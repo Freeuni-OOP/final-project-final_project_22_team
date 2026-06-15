@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  db:
+    image: mysql:8.0
+    container_name: serial_tracker_db
+    restart: always
+    environment:
+      MYSQL_DATABASE: serial_tracker
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_USER: tracker_user
+      MYSQL_PASSWORD: tracker_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+
+volumes:
+  mysql_data:
