@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import CustomInput from '../components/CustomInput';
 
@@ -18,41 +17,49 @@ const RegisterPage = () => {
         }
 
         try {
-            await axios.post("https://localhost:8443/api/auth/register", { username, password });
+            const response = await fetch("https://localhost:8443/api/auth/register", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ username, password })
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText || "Registration failed.");
+            }
+
             alert("Registration successful!");
             navigate('/login');
         } catch (err) {
-            setError(err.response?.data || "Registration failed.");
+            setError(err.message || "Registration failed.");
         }
     };
 
     return (
-        <div style={{
-            maxWidth: '400px',
-            margin: '80px auto',
-            padding: '30px',
-            boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-            borderRadius: '8px',
-            backgroundColor: '#fff'
-        }}>
-            <h2 style={{ marginBottom: '20px', color: '#333' }}>Create Account</h2>
-            {error && <p style={{ color: 'red', marginBottom: '15px' }}>{error}</p>}
+        <div className="register-bg">
+            <div className="register-card">
+                <h2 style={{ marginBottom: '25px', color: '#fff', textAlign: 'center', fontSize: '28px', fontWeight: 'bold' }}>Sign Up</h2>
+                {error && <p style={{ color: '#ff6b6b', marginBottom: '15px', textAlign: 'center' }}>{error}</p>}
 
-            <form onSubmit={handleRegister}>
-                <CustomInput type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
-                <CustomInput type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-                <CustomInput type="password" placeholder="Confirm Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
+                <form onSubmit={handleRegister}>
+                    <CustomInput type="text" placeholder="Username" value={username} onChange={(e) => setUsername(e.target.value)} required />
+                    <CustomInput type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+                    <CustomInput type="password" placeholder="Repeat Password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} required />
 
-                <button type="submit" style={{
-                    width: '100%', padding: '12px', backgroundColor: '#007bff', color: '#fff',
-                    border: 'none', borderRadius: '6px', fontSize: '16px', cursor: 'pointer'
-                }}>
-                    Sign Up
-                </button>
-            </form>
-            <p style={{ marginTop: '20px' }}>
-                Already have an account? <Link to="/login" style={{ color: '#007bff', textDecoration: 'none' }}>Login</Link>
-            </p>
+                    <button type="submit" className="signup-btn">
+                        Sign Up
+                    </button>
+                </form>
+
+                <p style={{ marginTop: '25px', textAlign: 'center', color: 'rgba(255, 255, 255, 0.6)', fontSize: '14px' }}>
+                    Already have an account?{' '}
+                    <Link to="/login" style={{ color: '#14b8a6', textDecoration: 'none', fontWeight: '600', marginLeft: '5px' }}>
+                        Login
+                    </Link>
+                </p>
+            </div>
         </div>
     );
 };
