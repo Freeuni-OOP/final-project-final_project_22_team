@@ -1,7 +1,11 @@
 package com.serialtracker.backend.dto;
 
 import jakarta.validation.constraints.NotBlank;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 public class LoginRequest {
 
     @NotBlank(message = "username is mandatory")
