@@ -1,11 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import '../style/ShowsPage.css'; // სტილებისთვის
+import '../style/ShowsPage.css';
+import {useNavigate} from "react-router-dom"; // სტილებისთვის
 
 export default function ShowsPage() {
     const [shows, setShows] = useState([]);
     const [searchQuery, setSearchQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [title, setTitle] = useState('Trending This Week');
+
+    const navigate = useNavigate();
 
     // ბაზისური URL ჩვენი ბექენდისთვის
     const BASE_URL = 'https://localhost:8443/api/shows';
@@ -73,7 +76,9 @@ export default function ShowsPage() {
             ) : (
                 <div className="shows-grid">
                     {shows.map((show) => (
-                        <div key={show.id} className="show-card">
+                        <div key={show.id} className="show-card"  onClick={() => navigate(`/shows/${show.id}`)}
+                             style={{ cursor: 'pointer' }}
+                        >
                             <div className="card-image-wrapper">
                                 {show.poster_path ? (
                                     <img
