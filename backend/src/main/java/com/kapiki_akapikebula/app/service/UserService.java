@@ -14,6 +14,8 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private JwtUtil jwtUtil;
 
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
     public User registerUser(User user) {
@@ -27,14 +29,14 @@ public class UserService {
         user.setCreatedAt(LocalDateTime.now());
         return userRepository.save(user);
     }
-    public User loginUser(String email, String password) {
-        // 1. ვეძებთ იუზერს იმეილით
-        User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("A user with this email not found!"));
+    public String loginUser(String email, String password) {
+
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new RuntimeException("A user with this email not found!"));
 
         if (!passwordEncoder.matches(password, user.getPasswordHash())) {
             throw new RuntimeException("incorrect password!");
         }
-        return user;
+
+        return jwtUtil.generateToken(user.getEmail());
     }
 }
