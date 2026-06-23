@@ -21,3 +21,4 @@ Thumbs.db
 # Environment/config files with secrets (we'll use this later for DB credentials)
 *.env
 config.properties
+src/main/resources/db.properties
