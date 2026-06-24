@@ -1,12 +1,14 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage.jsx';
-import Register from './pages/RegisterPage.jsx'; // შემოვიტანოთ ახალი კომპონენტი
+import Register from './pages/RegisterPage.jsx';
 import ShowsPage from './pages/ShowsPage.jsx';
 import ShowsDetailsPage from "./pages/ShowsDetailsPage.jsx";
+import Header from "./components/Header.jsx";
 
 function App() {
     return (
         <Router>
+            <Header />
             <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<Register />} />
