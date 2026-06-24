@@ -28,9 +28,8 @@ const LoginPage = () => {
 
             const token = await response.text();
             localStorage.setItem('token', token);
-
             alert("Login successful!");
-          //  navigate('/dashboard');
+           navigate('/');
         } catch (err) {
             setError(err.message || "Something went wrong. Please try again.");
         }

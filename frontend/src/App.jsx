@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import LoginPage from './pages/LoginPage.jsx';
 import Register from './pages/RegisterPage.jsx'; // შემოვიტანოთ ახალი კომპონენტი
 import ShowsPage from './pages/ShowsPage.jsx';
+import ShowsDetailsPage from "./pages/ShowsDetailsPage.jsx";
 
 function App() {
     return (
@@ -10,6 +11,8 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="/shows" element={<ShowsPage />} />
+                <Route path="/" element={<ShowsPage />} />
+                <Route path="/shows/:id" element={<ShowsDetailsPage />} />
             </Routes>
         </Router>
     );
