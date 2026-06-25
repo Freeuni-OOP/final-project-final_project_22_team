@@ -1,5 +1,6 @@
 package com.hikebuddy.util;
 
+import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
@@ -20,8 +21,8 @@ public class PasswordUtil {
     public static String hashPassword(String plaintext, String salt) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            digest.update(salt.getBytes());
-            byte[] hashedBytes = digest.digest(plaintext.getBytes());
+            digest.update(salt.getBytes(StandardCharsets.UTF_8));
+            byte[] hashedBytes = digest.digest(plaintext.getBytes(StandardCharsets.UTF_8));
             return bytesToHex(hashedBytes);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException("SHA-256 algorithm not available", e);
@@ -32,8 +33,8 @@ public class PasswordUtil {
     public static boolean verifyPassword(String plaintext, String storedHash, String storedSalt) {
         String computedHash = hashPassword(plaintext, storedSalt);
         return MessageDigest.isEqual(
-                computedHash.getBytes(),
-                storedHash.getBytes()
+                computedHash.getBytes(StandardCharsets.UTF_8),
+                storedHash.getBytes(StandardCharsets.UTF_8)
         );
     }
 

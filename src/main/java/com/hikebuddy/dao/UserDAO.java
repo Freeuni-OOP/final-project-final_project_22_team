@@ -16,13 +16,6 @@ import java.sql.Statement;
  */
 public class UserDAO {
 
-    /**
-     * Inserts a new user into the database.
-     * Retrieves the auto-generated id and sets it back on the User object,
-     * so the caller (RegisterServlet) immediately has a fully-populated User
-     * without needing a separate SELECT.
-     * Throws SQLException - the caller decides how to handle/display it.
-     */
     public void insert(User u) throws SQLException {
         String sql = "INSERT INTO User (username, password_hash, salt, hiking_level) " +
                 "VALUES (?, ?, ?, ?)";
@@ -45,12 +38,9 @@ public class UserDAO {
         }
     }
 
-    /**
-     * Finds a user by their username.
-     * Returns null if no user with that username exists.
-     */
     public User findByUsername(String username) throws SQLException {
-        String sql = "SELECT * FROM User WHERE username = ?";
+        String sql = "SELECT id, username, password_hash, salt, hiking_level, bio, created_at " +
+                "FROM User WHERE username = ?";
 
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
@@ -67,9 +57,6 @@ public class UserDAO {
         }
     }
 
-    /**
-     * Helper method: converts one row of a ResultSet into a User object.
-     */
     private User mapRowToUser(ResultSet rs) throws SQLException {
         User user = new User();
         user.setId(rs.getInt("id"));
