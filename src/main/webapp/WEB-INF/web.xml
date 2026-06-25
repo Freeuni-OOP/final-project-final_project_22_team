@@ -6,4 +6,14 @@
 
     <display-name>HikeBuddy</display-name>
 
+    <!-- RegisterServlet — added in Epic 2, task 2.4-2.5 -->
+    <servlet>
+        <servlet-name>RegisterServlet</servlet-name>
+        <servlet-class>com.hikebuddy.servlet.RegisterServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>RegisterServlet</servlet-name>
+        <url-pattern>/register</url-pattern>
+    </servlet-mapping>
+
 </web-app>
