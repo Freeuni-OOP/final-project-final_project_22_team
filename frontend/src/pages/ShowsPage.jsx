@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../style/ShowsPage.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const GENRES = [
     { id: 'all', name: 'All Genres' },
@@ -13,46 +13,92 @@ const GENRES = [
 ];
 
 export default function ShowsPage() {
-    const [trendingShows, setTrendingShows] = useState([]);
+    const location = useLocation();
+    const navigate = useNavigate();
+
+    const [trendingShowsList, setTrendingShowsList] = useState([]);
     const [allShows, setAllShows] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedGenre, setSelectedGenre] = useState('all');
     const [loading, setLoading] = useState(false);
     const [gridTitle, setGridTitle] = useState('Explore TV Shows');
+    const [selectedGenre, setSelectedGenre] = useState('all');
 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [searchMode, setSearchMode] = useState('trending');
 
-    const navigate = useNavigate();
-
-    // 🚀 დროებითი ვიზუალური სთეითები Letterboxd-ის ეფექტებისთვის
-    const [watchedStatus, setWatchedStatus] = useState({}); // 'watched', 'watching', ან null
-    const [favorites, setFavorites] = useState({});         // true/false
-    const [planToWatch, setPlanToWatch] = useState({});     // true/false
-    const [dropped, setDropped] = useState({});             // true/false
+    const [activeStatus, setActiveStatus] = useState({});
+    const [favorites, setFavorites] = useState({});
 
     const BASE_URL = 'https://localhost:8443/api/shows';
+    const TRACKING_URL = 'https://localhost:8443/api/tracking';
     const ribbonRef = useRef(null);
+
+    // 🔐 ტოკენი
+    const tokenObj = localStorage.getItem('token');
+    const token = tokenObj ? JSON.parse(tokenObj).token : null;
+
+    const parseJwt = (token) => {
+        if (!token) return null;
+        try { return JSON.parse(atob(token.split('.')[1])); } catch (e) { return null; }
+    };
+
+    const decodedToken = parseJwt(token);
+    const username = decodedToken?.sub;
 
     useEffect(() => {
         fetchRibbonTrending();
-        fetchGridShows(1, 'trending', '', 'all');
     }, []);
+
+    // უსმენს URL პარამეტრებს (query ჰედერიდან, genre ქვემოდან)
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const queryParam = params.get('query') || '';
+        const genreParam = params.get('genre') || 'all';
+
+        setSelectedGenre(genreParam); // სინქრონიზაცია სელექტისთვის
+
+        let mode = 'trending';
+        if (queryParam.trim()) mode = 'text';
+        else if (genreParam !== 'all') mode = 'genre';
+
+        fetchGridShows(1, mode, queryParam, genreParam);
+    }, [location.search]);
+
+    // იუზერის სტატუსების სინქრონიზაცია ბაზასთან
+    useEffect(() => {
+        if (!username) return;
+        const uniqueShowIds = [...new Set([...allShows, ...trendingShowsList].map(s => s.id))];
+        uniqueShowIds.forEach(id => {
+            fetchShowStatusFromBackend(id);
+        });
+    }, [allShows, trendingShowsList, username]);
+
+    const fetchShowStatusFromBackend = (showId) => {
+        fetch(`${TRACKING_URL}/get-status?username=${username}&showId=${showId}`, {
+            headers: { 'Authorization': `Bearer ${token}` }
+        })
+            .then(res => res.ok ? res.json() : null)
+            .then(data => {
+                if (data) {
+                    setActiveStatus(prev => ({ ...prev, [showId]: data.status }));
+                    setFavorites(prev => ({ ...prev, [showId]: data.favorite }));
+                }
+            })
+            .catch(err => console.error(err));
+    };
 
     const fetchRibbonTrending = async () => {
         try {
             const response = await fetch(`${BASE_URL}/trending?page=1`);
             if (response.ok) {
                 const data = await response.json();
-                setTrendingShows(data.results || []);
+                setTrendingShowsList(data.results || []);
             }
         } catch (error) {
-            System.out.println("Error loading ribbon: " + error);
+            console.error("Error loading ribbon: ", error);
         }
     };
 
-    const fetchGridShows = async (page = 1, currentMode = searchMode, query = searchQuery, genre = selectedGenre) => {
+    const fetchGridShows = async (page = 1, currentMode, query, genre) => {
         setLoading(true);
         try {
             let url = `${BASE_URL}/trending?page=${page}`;
@@ -81,82 +127,65 @@ export default function ShowsPage() {
         }
     };
 
-
-    const toggleFavorite = (id) => setFavorites(prev => ({ ...prev, [id]: !prev[id] }));
-    const toggleWatched = (id) => {
-
-        setDropped(prev => ({ ...prev, [id]: false }));
-        setPlanToWatch(prev => ({ ...prev, [id]: false }));
-
-        setWatchedStatus(prev => {
-            const current = prev[id];
-            if (!current) return { ...prev, [id]: 'watched' };   // 1 კლიკი: Watched
-            if (current === 'watched') return { ...prev, [id]: 'watching' }; // 2 კლიკი: Watching
-            return { ...prev, [id]: null };                       // 3 კლიკი: Off
-        });
-    };
-
-    const togglePlan = (id) => {
-        // თუ გეგმაში ვამატებთ, ავტომატურად იშლება Dropped და ნანახის სტატუსები
-        setDropped(prev => ({ ...prev, [id]: false }));
-        setWatchedStatus(prev => ({ ...prev, [id]: null }));
-
-        setPlanToWatch(prev => ({ ...prev, [id]: !prev[id] }));
-    };
-
-    const toggleDropped = (id) => {
-        // თუ სერიალს ვაგდებთ (Dropped), ავტომატურად უქმდება ნანახი/საყურებელი და გეგმები
-        if (!dropped[id]) {
-            setWatchedStatus(prev => ({ ...prev, [id]: null }));
-            setPlanToWatch(prev => ({ ...prev, [id]: false }));
-        }
-
-        setDropped(prev => ({ ...prev, [id]: !prev[id] }));
-    };
-    const handleSearch = (e) => {
-        e.preventDefault();
-        setSelectedGenre('all');
-        if (!searchQuery.trim()) {
-            setSearchMode('trending');
-            fetchGridShows(1, 'trending', '', 'all');
-            return;
-        }
-        setSearchMode('text');
-        fetchGridShows(1, 'text', searchQuery, 'all');
-    };
-
+    // ჟანრის შეცვლისას URL-ის განახლება
     const handleGenreChange = (e) => {
         const genreId = e.target.value;
-        setSelectedGenre(genreId);
-        setSearchQuery('');
+        const params = new URLSearchParams(location.search);
+
         if (genreId === 'all') {
-            setSearchMode('trending');
-            fetchGridShows(1, 'trending', '', 'all');
+            params.delete('genre');
         } else {
-            setSearchMode('genre');
-            fetchGridShows(1, 'genre', '', genreId);
+            params.set('genre', genreId);
         }
+        params.delete('query'); // ჟანრის შეცვლისას ძებნას ვაუქმებთ
+
+        navigate(`/shows?${params.toString()}`);
+    };
+
+    const handleStatusUpdate = (showId, statusName) => {
+        const currentStatus = activeStatus[showId];
+        const newStatus = currentStatus === statusName ? null : statusName;
+        setActiveStatus(prev => ({ ...prev, [showId]: newStatus }));
+
+        fetch(`${TRACKING_URL}/show-status?username=${username}&showId=${showId}&status=${statusName}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(err => console.error(err));
+    };
+
+    const handleFavoriteToggle = (showId) => {
+        const currentFav = !!favorites[showId];
+        setFavorites(prev => ({ ...prev, [showId]: !currentFav }));
+
+        fetch(`${TRACKING_URL}/toggle-favorite?username=${username}&showId=${showId}`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${token}` }
+        }).catch(err => console.error(err));
+    };
+
+    const handlePageChange = (newPage) => {
+        const params = new URLSearchParams(location.search);
+        const queryParam = params.get('query') || '';
+        const genreParam = params.get('genre') || 'all';
+
+        let mode = 'trending';
+        if (queryParam.trim()) mode = 'text';
+        else if (genreParam !== 'all') mode = 'genre';
+
+        fetchGridShows(newPage, mode, queryParam, genreParam);
     };
 
     const renderShowCard = (show) => {
         const id = show.id;
-        const isFav = favorites[id];
-        const isPlan = planToWatch[id];
-        const isDrop = dropped[id];
-        const watchMode = watchedStatus[id]; // 'watched', 'watching', ან undefined
+        const isFavoriteShow = !!favorites[id];
+        const currentShowStatus = activeStatus[id];
 
-        // თვალის აიქონის დინამიკური კლასი
         let eyeClass = "action-icon eye-icon";
-        if (watchMode === 'watched') eyeClass += " active-full";
-        if (watchMode === 'watching') eyeClass += " active-half";
+        if (currentShowStatus === 'WATCHING') eyeClass += " active-half";
+        if (currentShowStatus === 'COMPLETED') eyeClass += " active-full";
 
         return (
-            <div
-                key={show.id}
-                className="show-card"
-                onClick={() => navigate(`/shows/${id}`)}
-                style={{ cursor: 'pointer' }}
-            >
+            <div key={show.id} className="show-card" onClick={() => navigate(`/shows/${id}`)} style={{ cursor: 'pointer' }}>
                 <div className="card-image-wrapper">
                     {show.poster_path ? (
                         <img src={`https://image.tmdb.org/t/p/w500${show.poster_path}`} alt={show.name} className="show-poster" />
@@ -172,46 +201,24 @@ export default function ShowsPage() {
                         <p className="show-date">{show.first_air_date ? show.first_air_date.split('-')[0] : 'N/A'}</p>
                     </div>
 
+                    {username && (
+                        <div className="letterboxd-actions" onClick={(e) => e.stopPropagation()}>
+                            <button className={eyeClass} onClick={(e) => {
+                                e.stopPropagation();
+                                if (!currentShowStatus) handleStatusUpdate(id, 'WATCHING');
+                                else if (currentShowStatus === 'WATCHING') handleStatusUpdate(id, 'COMPLETED');
+                                else handleStatusUpdate(id, null);
+                            }} title="Mark as Watched / Watching">👁</button>
 
-                    {/* დავამატეთ onClick={() => e.stopPropagation()} თითოეულ ღილაკზე,
-                       რომ ღილაკზე კლიკმა არ გადაგვიყვანოს დეტალების გვერდზე */}
-                    <div className="letterboxd-actions" onClick={(e) => e.stopPropagation()}>
-                        {/* eye */}
-                        <button
-                            className={eyeClass}
-                            onClick={(e) => { e.stopPropagation(); toggleWatched(id); }}
-                            title={watchMode === 'watched' ? 'Watched' : watchMode === 'watching' ? 'Watching' : 'Mark as Watched/Watching'}
-                        >
-                            👁
-                        </button>
+                            <button className={`action-icon heart-icon ${isFavoriteShow ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleFavoriteToggle(id); }} title="Favorite">
+                                {isFavoriteShow ? '❤️' : '♡'}
+                            </button>
 
-                        {/* heart */}
-                        <button
-                            className={`action-icon heart-icon ${isFav ? 'active' : ''}`}
-                            onClick={(e) => { e.stopPropagation(); toggleFavorite(id); }}
-                            title="Favorite"
-                        >
-                            {isFav ? '❤️' : '♡'}
-                        </button>
+                            <button className={`action-icon star-icon ${currentShowStatus === 'PLAN_TO_WATCH' ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleStatusUpdate(id, 'PLAN_TO_WATCH'); }} title="Plan to Watch">★</button>
 
-                        {/* star */}
-                        <button
-                            className={`action-icon star-icon ${isPlan ? 'active' : ''}`}
-                            onClick={(e) => { e.stopPropagation(); togglePlan(id); }}
-                            title="Plan to Watch"
-                        >
-                            ★
-                        </button>
-
-                        {/* X */}
-                        <button
-                            className={`action-icon drop-icon ${isDrop ? 'active' : ''}`}
-                            onClick={(e) => { e.stopPropagation(); toggleDropped(id); }}
-                            title="Dropped"
-                        >
-                            ✕
-                        </button>
-                    </div>
+                            <button className={`action-icon drop-icon ${currentShowStatus === 'DROPPED' ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleStatusUpdate(id, 'DROPPED'); }} title="Dropped">✕</button>
+                        </div>
+                    )}
                 </div>
             </div>
         );
@@ -219,27 +226,16 @@ export default function ShowsPage() {
 
     return (
         <div className="shows-container">
-            <header className="shows-header">
-                <div className="filter-wrapper">
-                    <select value={selectedGenre} onChange={handleGenreChange} className="glass-select">
-                        {GENRES.map(genre => (
-                            <option key={genre.id} value={genre.id} className="dark-option">{genre.name}</option>
-                        ))}
-                    </select>
-                </div>
-                <form onSubmit={handleSearch} className="search-form">
-                    <input
-                        type="text"
-                        placeholder="Search for TV shows..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="glass-input"
-                    />
-                    <button type="submit" className="neon-button">Search</button>
-                </form>
-            </header>
+            {/* 📍 ჟანრების ფილტრი დარჩა აქ, ოღონდ <header>-ის გარეშე სუფთად */}
+            <div className="shows-page-filter-bar">
+                <select value={selectedGenre} onChange={handleGenreChange} className="glass-select">
+                    {GENRES.map(genre => (
+                        <option key={genre.id} value={genre.id} className="dark-option">{genre.name}</option>
+                    ))}
+                </select>
+            </div>
 
-            {searchMode === 'trending' && trendingShows.length > 0 && (
+            {trendingShowsList.length > 0 && !location.search.includes('query') && !location.search.includes('genre=') && (
                 <div className="ribbon-section">
                     <div className="ribbon-header">
                         <h2 className="section-title">Trending This Week</h2>
@@ -249,7 +245,7 @@ export default function ShowsPage() {
                         </div>
                     </div>
                     <div className="ribbon-track" ref={ribbonRef}>
-                        {trendingShows.map(show => renderShowCard(show))}
+                        {trendingShowsList.map(show => renderShowCard(show))}
                     </div>
                 </div>
             )}
@@ -269,9 +265,9 @@ export default function ShowsPage() {
                         )}
                         {totalPages > 1 && (
                             <div className="pagination-container">
-                                <button onClick={() => fetchGridShows(currentPage - 1)} disabled={currentPage === 1} className="pagination-button">⟨ Prev</button>
+                                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="pagination-button">⟨ Prev</button>
                                 <span className="pagination-info">Page <strong className="neon-text">{currentPage}</strong> of {totalPages}</span>
-                                <button onClick={() => fetchGridShows(currentPage + 1)} disabled={currentPage === totalPages} className="pagination-button">Next ⟩</button>
+                                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="pagination-button">Next ⟩</button>
                             </div>
                         )}
                     </>

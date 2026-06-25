@@ -1,0 +1,178 @@
+.main-header {
+    width: 100%;
+    background: rgba(18, 24, 31, 0.85); /* მუქი ფონი */
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+    padding: 0 2rem;
+}
+
+.header-container {
+    max-width: 1300px;
+    height: 70px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: 3rem;
+}
+
+.header-logo {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #ffffff;
+    text-decoration: none;
+    letter-spacing: 1.5px;
+}
+
+.header-nav {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.nav-item {
+    color: #9aabbc;
+    text-decoration: none;
+    font-size: 1rem;
+    font-weight: 500;
+    transition: color 0.2s ease;
+}
+
+.nav-item:hover {
+    color: #ffffff;
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.header-log-btn {
+    background-color: #00b4a2;
+    color: #12181f;
+    border: none;
+    padding: 0.5rem 1.2rem;
+    border-radius: 20px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+.header-log-btn:hover {
+    background-color: #00d1bc;
+    transform: scale(1.03);
+}
+
+.header-profile-wrapper {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+}
+
+.header-username {
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 1rem;
+}
+
+.header-avatar {
+    width: 36px;
+    height: 36px;
+    background-color: #00b4a2;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #12181f;
+    font-weight: 700;
+    font-size: 1rem;
+    box-shadow: 0 0 10px rgba(0, 180, 162, 0.3);
+}
+
+.header-login-link {
+    color: #00b4a2;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+/* ჰედერის შუა ბლოკი */
+.header-middle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 1;
+    max-width: 450px;
+    margin: 0 2rem;
+}
+
+/* ძებნის ფორმის კონტეინერი */
+.header-search-form {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 20px; /* მთლიანად მომრგვალებული მინისებრი კონტეინერი */
+    padding: 2px 4px 2px 12px;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.header-search-form:focus-within {
+    border-color: rgba(0, 180, 162, 0.5);
+    box-shadow: 0 0 10px rgba(0, 180, 162, 0.15);
+}
+
+/* ინპუტის ველის გასუფთავება ძველი სტილებისგან */
+.glass-input-header {
+    background: transparent;
+    border: none;
+    color: #ffffff;
+    font-size: 0.9rem;
+    width: 100%;
+    height: 34px;
+    outline: none;
+}
+
+.glass-input-header::placeholder {
+    color: #5f758a;
+}
+
+
+.neon-button-header {
+    background: #00b4a2;
+    border: none;
+    color: #12181f;
+    padding: 0 1rem;
+    border-radius: 16px;
+    font-weight: 700;
+    font-size: 0.85rem;
+    cursor: pointer;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background-color 0.2s, transform 0.1s;
+}
+
+.neon-button-header:hover {
+    background: #00d1bc;
+}
+
+.neon-button-header:active {
+    transform: scale(0.97);
+}
