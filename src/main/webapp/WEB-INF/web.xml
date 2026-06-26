@@ -16,4 +16,13 @@
         <url-pattern>/register</url-pattern>
     </servlet-mapping>
 
+    <!-- LoginServlet — added in Epic 2, task 2.6-2.7 -->
+    <servlet>
+        <servlet-name>LoginServlet</servlet-name>
+        <servlet-class>com.hikebuddy.servlet.LoginServlet</servlet-class>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>LoginServlet</servlet-name>
+        <url-pattern>/login</url-pattern>
+    </servlet-mapping>
 </web-app>
