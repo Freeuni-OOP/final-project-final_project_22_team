@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import '../style/ShowsPage.css';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const GENRES = [
     { id: 'all', name: 'All Genres' },
@@ -13,18 +13,17 @@ const GENRES = [
 ];
 
 export default function ShowsPage() {
+    const location = useLocation();
+    const navigate = useNavigate();
+
     const [trendingShowsList, setTrendingShowsList] = useState([]);
     const [allShows, setAllShows] = useState([]);
-    const [searchQuery, setSearchQuery] = useState('');
-    const [selectedGenre, setSelectedGenre] = useState('all');
     const [loading, setLoading] = useState(false);
     const [gridTitle, setGridTitle] = useState('Explore TV Shows');
+    const [selectedGenre, setSelectedGenre] = useState('all');
 
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [searchMode, setSearchMode] = useState('trending');
-
-    const navigate = useNavigate();
 
     const [activeStatus, setActiveStatus] = useState({});
     const [favorites, setFavorites] = useState({});
@@ -38,11 +37,7 @@ export default function ShowsPage() {
 
     const parseJwt = (token) => {
         if (!token) return null;
-        try {
-            return JSON.parse(atob(token.split('.')[1]));
-        } catch (e) {
-            return null;
-        }
+        try { return JSON.parse(atob(token.split('.')[1])); } catch (e) { return null; }
     };
 
     const decodedToken = parseJwt(token);
@@ -50,7 +45,6 @@ export default function ShowsPage() {
 
     useEffect(() => {
         fetchRibbonTrending();
-        fetchGridShows(1, 'trending', '', 'all');
     }, []);
 
     useEffect(() => {
@@ -59,23 +53,20 @@ export default function ShowsPage() {
         uniqueShowIds.forEach(id => {
             fetchShowStatusFromBackend(id);
         });
-    }, [allShows, trendingShowsList, token, username]);
+    }, [allShows, trendingShowsList, username]);
 
     const fetchShowStatusFromBackend = (showId) => {
         fetch(`${TRACKING_URL}/get-status?username=${username}&showId=${showId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
-            .then(res => {
-                if (res.ok) return res.json();
-                return null;
-            })
+            .then(res => res.ok ? res.json() : null)
             .then(data => {
                 if (data) {
                     setActiveStatus(prev => ({ ...prev, [showId]: data.status }));
                     setFavorites(prev => ({ ...prev, [showId]: data.favorite }));
                 }
             })
-            .catch(err => console.error(`Error fetching status for show ${showId}:`, err));
+            .catch(err => console.error(err));
     };
 
     const fetchRibbonTrending = async () => {
@@ -90,7 +81,7 @@ export default function ShowsPage() {
         }
     };
 
-    const fetchGridShows = async (page = 1, currentMode = searchMode, query = searchQuery, genre = selectedGenre) => {
+    const fetchGridShows = async (page = 1, currentMode, query, genre) => {
         setLoading(true);
         try {
             let url = `${BASE_URL}/trending?page=${page}`;
@@ -123,7 +114,6 @@ export default function ShowsPage() {
     const handleStatusUpdate = (showId, statusName) => {
         const currentStatus = activeStatus[showId];
         const newStatus = currentStatus === statusName ? null : statusName;
-
         setActiveStatus(prev => ({ ...prev, [showId]: newStatus }));
 
         // ⚡ ვაწვდით ახალ სტატუსს (newStatus-ს) ბექენდს
@@ -171,33 +161,19 @@ export default function ShowsPage() {
         fetch(`${TRACKING_URL}/toggle-favorite?username=${username}&showId=${showId}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
-        })
-            .catch(err => console.error("Favorite toggle failed:", err));
+        }).catch(err => console.error(err));
     };
 
-    const handleSearch = (e) => {
-        e.preventDefault();
-        setSelectedGenre('all');
-        if (!searchQuery.trim()) {
-            setSearchMode('trending');
-            fetchGridShows(1, 'trending', '', 'all');
-            return;
-        }
-        setSearchMode('text');
-        fetchGridShows(1, 'text', searchQuery, 'all');
-    };
+    const handlePageChange = (newPage) => {
+        const params = new URLSearchParams(location.search);
+        const queryParam = params.get('query') || '';
+        const genreParam = params.get('genre') || 'all';
 
-    const handleGenreChange = (e) => {
-        const genreId = e.target.value;
-        setSelectedGenre(genreId);
-        setSearchQuery('');
-        if (genreId === 'all') {
-            setSearchMode('trending');
-            fetchGridShows(1, 'trending', '', 'all');
-        } else {
-            setSearchMode('genre');
-            fetchGridShows(1, 'genre', '', genreId);
-        }
+        let mode = 'trending';
+        if (queryParam.trim()) mode = 'text';
+        else if (genreParam !== 'all') mode = 'genre';
+
+        fetchGridShows(newPage, mode, queryParam, genreParam);
     };
 
     const renderShowCard = (show) => {
@@ -210,12 +186,7 @@ export default function ShowsPage() {
         if (currentShowStatus === 'COMPLETED') eyeClass += " active-full";
 
         return (
-            <div
-                key={show.id}
-                className="show-card"
-                onClick={() => navigate(`/shows/${id}`)}
-                style={{ cursor: 'pointer' }}
-            >
+            <div key={show.id} className="show-card" onClick={() => navigate(`/shows/${id}`)} style={{ cursor: 'pointer' }}>
                 <div className="card-image-wrapper">
                     {show.poster_path ? (
                         <img src={`https://image.tmdb.org/t/p/w500${show.poster_path}`} alt={show.name} className="show-poster" />
@@ -278,27 +249,16 @@ export default function ShowsPage() {
 
     return (
         <div className="shows-container">
-            <header className="shows-header">
-                <div className="filter-wrapper">
-                    <select value={selectedGenre} onChange={handleGenreChange} className="glass-select">
-                        {GENRES.map(genre => (
-                            <option key={genre.id} value={genre.id} className="dark-option">{genre.name}</option>
-                        ))}
-                    </select>
-                </div>
-                <form onSubmit={handleSearch} className="search-form">
-                    <input
-                        type="text"
-                        placeholder="Search for TV shows..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="glass-input"
-                    />
-                    <button type="submit" className="neon-button">Search</button>
-                </form>
-            </header>
+            {/* 📍 ჟანრების ფილტრი დარჩა აქ, ოღონდ <header>-ის გარეშე სუფთად */}
+            <div className="shows-page-filter-bar">
+                <select value={selectedGenre} onChange={handleGenreChange} className="glass-select">
+                    {GENRES.map(genre => (
+                        <option key={genre.id} value={genre.id} className="dark-option">{genre.name}</option>
+                    ))}
+                </select>
+            </div>
 
-            {searchMode === 'trending' && trendingShowsList.length > 0 && (
+            {trendingShowsList.length > 0 && !location.search.includes('query') && !location.search.includes('genre=') && (
                 <div className="ribbon-section">
                     <div className="ribbon-header">
                         <h2 className="section-title">Trending This Week</h2>
@@ -328,9 +288,9 @@ export default function ShowsPage() {
                         )}
                         {totalPages > 1 && (
                             <div className="pagination-container">
-                                <button onClick={() => fetchGridShows(currentPage - 1)} disabled={currentPage === 1} className="pagination-button">⟨ Prev</button>
+                                <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="pagination-button">⟨ Prev</button>
                                 <span className="pagination-info">Page <strong className="neon-text">{currentPage}</strong> of {totalPages}</span>
-                                <button onClick={() => fetchGridShows(currentPage + 1)} disabled={currentPage === totalPages} className="pagination-button">Next ⟩</button>
+                                <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === totalPages} className="pagination-button">Next ⟩</button>
                             </div>
                         )}
                     </>
