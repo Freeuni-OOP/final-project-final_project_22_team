@@ -11,6 +11,7 @@ function ShowsDetailsPage() {
     const [selectedSeason, setSelectedSeason] = useState(1);
     const [seasonEpisodes, setSeasonEpisodes] = useState([]);
 
+    // 🟢 ტოკენისა და იუზერნეიმის სტაბილური ამოღება
     const tokenObj = localStorage.getItem('token');
     const token = tokenObj ? JSON.parse(tokenObj).token : null;
 
@@ -24,6 +25,7 @@ function ShowsDetailsPage() {
     };
 
     const decodedToken = parseJwt(token);
+    const username = decodedToken?.sub || decodedToken?.username || null;
 
     useEffect(() => {
         fetch(`https://localhost:8443/api/shows/${id}`)
@@ -43,19 +45,30 @@ function ShowsDetailsPage() {
                 setSeasonEpisodes([]);
             });
 
-        if (decodedToken?.sub) {
-            fetch(`https://localhost:8443/api/tracking/watched-episodes?username=${decodedToken.sub}&showId=${id}`, {
+        // ⚡ თუ იუზერნეიმი არსებობს, მხოლოდ მაშინ მოგვაქვს მონაცემები
+        if (username) {
+            fetch(`https://localhost:8443/api/tracking/watched-episodes?username=${username}&showId=${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
-                .then(res => res.json())
-                .then(data => setWatchedEpisodes(data || []))
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                    return res.text();
+                })
+                .then(text => {
+                    const data = text ? JSON.parse(text) : [];
+                    setWatchedEpisodes(data || []);
+                })
                 .catch(err => console.error("Error fetching watched episodes:", err));
 
-            fetch(`https://localhost:8443/api/tracking/get-status?username=${decodedToken.sub}&showId=${id}`, {
+            fetch(`https://localhost:8443/api/tracking/get-status?username=${username}&showId=${id}`, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
-                .then(res => res.json())
-                .then(data => {
+                .then(res => {
+                    if (!res.ok) throw new Error(`HTTP error! Status: ${res.status}`);
+                    return res.text();
+                })
+                .then(text => {
+                    const data = text ? JSON.parse(text) : null;
                     if (data) {
                         setActiveStatus(data.status);
                         setIsFavorite(data.favorite);
@@ -63,70 +76,72 @@ function ShowsDetailsPage() {
                 })
                 .catch(err => console.error("Error fetching status:", err));
         }
-    }, [id, selectedSeason, token, decodedToken?.sub]);
+    }, [id, selectedSeason, token, username]);
 
     const handleStatusUpdate = (statusName) => {
-        // თუ მიმდინარე სტატუსი ემთხვევა დაჭერილს, ახალი სტატუსი ხდება null (უქმდება)
+        if (!username) {
+            console.error("User is not logged in!");
+            return;
+        }
+
         const newStatus = activeStatus === statusName ? null : statusName;
         setActiveStatus(newStatus);
 
-        // ⚡ ყურადღება: ბექენდს ვუგზავნით newStatus-ს! თუ null-ია, ვუგზავნით ცარიელ სტრინგს
-        fetch(`https://localhost:8443/api/tracking/show-status?username=${decodedToken?.sub}&showId=${id}&status=${newStatus !== null ? newStatus : ''}`, {
+        fetch(`https://localhost:8443/api/tracking/show-status?username=${username}&showId=${id}&status=${newStatus !== null ? newStatus : ''}`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                'Authorization': `Bearer ${token}`
             }
         })
             .then((res) => {
                 if (!res.ok) throw new Error("Failed to update status");
 
-                // 🟢 თუ ახალი სტატუსი გახდა COMPLETED -> მონიშნე ყველა ეპიზოდი
                 if (newStatus === 'COMPLETED') {
-                    fetch(`https://localhost:8443/api/tracking/watch-all-episodes?username=${decodedToken?.sub}&showId=${id}`, {
+                    fetch(`https://localhost:8443/api/tracking/watch-all-episodes?username=${username}&showId=${id}`, {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
+                            'Authorization': `Bearer ${token}`
                         }
                     })
                         .then(episodeRes => {
                             if (!episodeRes.ok) throw new Error("Backend failed to sync episodes");
-                            return fetch(`https://localhost:8443/api/tracking/watched-episodes?username=${decodedToken.sub}&showId=${id}`, {
+                            return fetch(`https://localhost:8443/api/tracking/watched-episodes?username=${username}&showId=${id}`, {
                                 headers: { 'Authorization': `Bearer ${token}` }
                             });
                         })
-                        .then(res => res && res.json())
-                        .then(data => { if (data) setWatchedEpisodes(data); })
+                        .then(res => res && res.text())
+                        .then(text => {
+                            const data = text ? JSON.parse(text) : [];
+                            if (data) setWatchedEpisodes(data);
+                        })
                         .catch(err => console.error("Error setting all watched:", err));
                 }
 
-                // 🔴 თუ ახალი სტატუსი გახდა null (ანუ მომხმარებელმა გააუქმა თვალი, ვარსკვლავი ან სხვა რამ)
                 else if (newStatus === null) {
-                    fetch(`https://localhost:8443/api/tracking/unwatch-all-episodes?username=${decodedToken?.sub}&showId=${id}`, {
+                    fetch(`https://localhost:8443/api/tracking/unwatch-all-episodes?username=${username}&showId=${id}`, {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
+                            'Authorization': `Bearer ${token}`
                         }
                     })
                         .then(episodeRes => {
                             if (!episodeRes.ok) throw new Error("Backend failed to clear episodes");
-                            setWatchedEpisodes([]); // ეპიზოდებს ვუშლით ნანახის ვიზუალს მომენტალურად
+                            setWatchedEpisodes([]);
                         })
                         .catch(err => console.error("Error clearing watched episodes:", err));
                 }
             })
             .catch(err => {
                 console.error("Request failed:", err);
-                setActiveStatus(activeStatus); // ჩავარდნის შემთხვევაში ვაბრუნებთ ძველ სტატუსს
+                setActiveStatus(activeStatus);
             });
     };
 
     const handleFavoriteToggle = () => {
+        if (!username) return;
         setIsFavorite(!isFavorite);
 
-        fetch(`https://localhost:8443/api/tracking/toggle-favorite?username=${decodedToken?.sub}&showId=${id}`, {
+        fetch(`https://localhost:8443/api/tracking/toggle-favorite?username=${username}&showId=${id}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         })
@@ -134,16 +149,17 @@ function ShowsDetailsPage() {
     };
 
     const handleEpisodeToggle = (seasonNum, episodeNum) => {
-        // ⚡ თუ სერიალი იყო COMPLETED და ეპიზოდს მოვუხსენით ნიშნული, სტატუსი ხდება WATCHING
+        if (!username) return;
+
         if (activeStatus === 'COMPLETED') {
             setActiveStatus('WATCHING');
-            fetch(`https://localhost:8443/api/tracking/show-status?username=${decodedToken?.sub}&showId=${id}&status=WATCHING`, {
+            fetch(`https://localhost:8443/api/tracking/show-status?username=${username}&showId=${id}&status=WATCHING`, {
                 method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+                headers: { 'Authorization': `Bearer ${token}` }
             }).catch(err => console.error(err));
         }
 
-        fetch(`https://localhost:8443/api/tracking/toggle-episode?username=${decodedToken?.sub}&showId=${id}&seasonNumber=${seasonNum}&episodeNumber=${episodeNum}`, {
+        fetch(`https://localhost:8443/api/tracking/toggle-episode?username=${username}&showId=${id}&seasonNumber=${seasonNum}&episodeNumber=${episodeNum}`, {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         })
@@ -159,11 +175,9 @@ function ShowsDetailsPage() {
     };
 
     const isEpisodeWatched = (seasonNum, episodeNum) => {
-        // თუ სერიალის სტატუსი არის COMPLETED, ყველა ეპიზოდი ავტომატურად ნანახია!
         if (activeStatus === 'COMPLETED') {
             return true;
         }
-        // სხვა შემთხვევაში ვამოწმებთ სათითაოდ მონიშნულების მასივს
         return watchedEpisodes.some(ep => ep.seasonNumber === seasonNum && ep.episodeNumber === episodeNum);
     };
 
@@ -208,7 +222,7 @@ function ShowsDetailsPage() {
                         )}
                     </div>
 
-                    {decodedToken?.sub && (
+                    {username && (
                         <div className="letterboxd-actions-wrapper">
                             <div className="letterboxd-actions">
                                 <button

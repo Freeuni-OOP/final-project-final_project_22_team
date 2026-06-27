@@ -43,10 +43,27 @@ export default function ShowsPage() {
     const decodedToken = parseJwt(token);
     const username = decodedToken?.sub;
 
+    // Load trending ribbon content once on mount
     useEffect(() => {
         fetchRibbonTrending();
     }, []);
 
+    // Sync the grid data with the URL query parameters automatically
+    useEffect(() => {
+        const params = new URLSearchParams(location.search);
+        const queryParam = params.get('query') || '';
+        const genreParam = params.get('genre') || 'all';
+
+        setSelectedGenre(genreParam);
+
+        let mode = 'trending';
+        if (queryParam.trim()) mode = 'text';
+        else if (genreParam !== 'all') mode = 'genre';
+
+        fetchGridShows(1, mode, queryParam, genreParam);
+    }, [location.search]);
+
+    // Track user statuses for all loaded shows
     useEffect(() => {
         if (!username) return;
         const uniqueShowIds = [...new Set([...allShows, ...trendingShowsList].map(s => s.id))];
@@ -59,21 +76,26 @@ export default function ShowsPage() {
         fetch(`${TRACKING_URL}/get-status?username=${username}&showId=${showId}`, {
             headers: { 'Authorization': `Bearer ${token}` }
         })
-            .then(res => res.ok ? res.json() : null)
-            .then(data => {
+            .then(res => {
+                if (!res.ok) throw new Error(`Status HTTP error: ${res.status}`);
+                return res.text();
+            })
+            .then(text => {
+                const data = text ? JSON.parse(text) : null;
                 if (data) {
                     setActiveStatus(prev => ({ ...prev, [showId]: data.status }));
                     setFavorites(prev => ({ ...prev, [showId]: data.favorite }));
                 }
             })
-            .catch(err => console.error(err));
+            .catch(err => console.error("Error fetching show status:", err));
     };
 
     const fetchRibbonTrending = async () => {
         try {
             const response = await fetch(`${BASE_URL}/trending?page=1`);
             if (response.ok) {
-                const data = await response.json();
+                const text = await response.text();
+                const data = text ? JSON.parse(text) : {};
                 setTrendingShowsList(data.results || []);
             }
         } catch (error) {
@@ -96,54 +118,56 @@ export default function ShowsPage() {
                 setGridTitle('Explore TV Shows');
             }
 
-            const response = await fetch(url);
-            if (!response.ok) throw new Error('Failed to fetch data');
-            const data = await response.json();
+            const headers = {};
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+
+            const response = await fetch(url, { headers });
+
+            if (!response.ok) throw new Error(`Failed to fetch data (Status: ${response.status})`);
+
+            const text = await response.text();
+            const data = text ? JSON.parse(text) : {};
 
             setAllShows(data.results || []);
             setCurrentPage(data.page || page);
             setTotalPages(data.total_pages > 500 ? 500 : (data.total_pages || 1));
         } catch (error) {
-            console.error(error);
+            console.error("Error fetching grid shows:", error);
+            setAllShows([]);
         } finally {
             setLoading(false);
         }
     };
 
-    // განახლებული სტატუსის მართვა მთავარ გვერდზეც
     const handleStatusUpdate = (showId, statusName) => {
         const currentStatus = activeStatus[showId];
         const newStatus = currentStatus === statusName ? null : statusName;
         setActiveStatus(prev => ({ ...prev, [showId]: newStatus }));
 
-        // ⚡ ვაწვდით ახალ სტატუსს (newStatus-ს) ბექენდს
         fetch(`${TRACKING_URL}/show-status?username=${username}&showId=${showId}&status=${newStatus !== null ? newStatus : ''}`, {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+                'Authorization': `Bearer ${token}`
             }
         })
             .then((res) => {
-                if (!res.ok) throw new Error("Failed to update status");
+                if (!res.ok) throw new Error(`Failed to update status (Status: ${res.status})`);
 
-                // თუ მონიშნა COMPLETED
                 if (newStatus === 'COMPLETED') {
                     fetch(`${TRACKING_URL}/watch-all-episodes?username=${username}&showId=${showId}`, {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
+                            'Authorization': `Bearer ${token}`
                         }
                     }).catch(err => console.error(err));
                 }
-                // თუ სრულად გააუქმა სტატუსი (მოხსნა თვალი ან ვარსკვლავი)
                 else if (newStatus === null) {
                     fetch(`${TRACKING_URL}/unwatch-all-episodes?username=${username}&showId=${showId}`, {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${token}`,
-                            'Content-Type': 'application/json'
+                            'Authorization': `Bearer ${token}`
                         }
                     }).catch(err => console.error(err));
                 }
@@ -162,6 +186,21 @@ export default function ShowsPage() {
             method: 'POST',
             headers: { 'Authorization': `Bearer ${token}` }
         }).catch(err => console.error(err));
+    };
+
+    const handleGenreChange = (e) => {
+        const newGenre = e.target.value;
+        setSelectedGenre(newGenre);
+
+        const params = new URLSearchParams(location.search);
+        if (newGenre === 'all') {
+            params.delete('genre');
+        } else {
+            params.set('genre', newGenre);
+        }
+        params.delete('query');
+
+        navigate({ search: params.toString() });
     };
 
     const handlePageChange = (newPage) => {
@@ -249,7 +288,6 @@ export default function ShowsPage() {
 
     return (
         <div className="shows-container">
-            {/* 📍 ჟანრების ფილტრი დარჩა აქ, ოღონდ <header>-ის გარეშე სუფთად */}
             <div className="shows-page-filter-bar">
                 <select value={selectedGenre} onChange={handleGenreChange} className="glass-select">
                     {GENRES.map(genre => (

@@ -8,13 +8,14 @@ import com.serialtracker.backend.repository.UserRepository;
 import com.serialtracker.backend.repository.UserShowStatusRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.transaction.annotation.Transactional;
+import jakarta.transaction.Transactional;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/tracking")
 @CrossOrigin(origins = "http://localhost:5173")
+@Transactional
 public class UserTrackingController {
 
     private final UserShowStatusRepository statusRepository;
@@ -33,22 +34,27 @@ public class UserTrackingController {
     public ResponseEntity<?> updateShowStatus(
             @RequestParam String username,
             @RequestParam int showId,
-            @RequestParam(required = false) String status) { // String-ად ვიღებთ, რომ null/ცარიელი დავიჭიროთ
+            @RequestParam(required = false) String status) {
 
         Long userId = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("User not found"))
                 .getId();
 
+        // 🟢 ვეძებთ ძველს, თუ არ არის, ვქმნით სუფთად
         UserShowStatus showStatus = statusRepository.findByUserIdAndShowId(userId, showId)
-                .orElse(new UserShowStatus(userId, showId, null));
+                .orElseGet(() -> {
+                    UserShowStatus newStatusObj = new UserShowStatus();
+                    newStatusObj.setUserId(userId);
+                    newStatusObj.setShowId(showId);
+                    newStatusObj.setFavorite(false);
+                    return newStatusObj;
+                });
 
-        // თუ სტატუსი ცარიელია ან null, ბაზაში ვსვამთ null-ს (ვაუქმებთ)
         if (status == null || status.trim().isEmpty() || status.equals("null")) {
             showStatus.setStatus(null);
             statusRepository.save(showStatus);
             return ResponseEntity.ok("Show status cleared (set to null)");
         } else {
-            // წინააღმდეგ შემთხვევაში ვკონვერტირებთ Enum-ში
             SeriesStatus seriesStatus = SeriesStatus.valueOf(status.toUpperCase());
             showStatus.setStatus(seriesStatus);
             statusRepository.save(showStatus);
@@ -56,9 +62,6 @@ public class UserTrackingController {
         }
     }
 
-    //  ახალი ენდფოინთი: ყველა ეპიზოდის მონიშვნა (ფრონტენდიდან სეზონების/ეპიზოდების თვლა TMDB სირთულის გამო არ გვინდა, უბრალოდ ვინახავთ ფიქტიურ -1 ჩანაწერს, ან თუ ბაზა სხვანაირადაა აწყობილი, შენს ლოგიკას მოარგებ)
-    // თუმცა ყველაზე მარტივია: ფრონტენდზე როცა დაინახავს სტატუსს COMPLETED, ეგრევე მონიშნულად თვლის.
-    // თუ მაინც გინდა კონკრეტული სეზონების ჩაყრა, ბაზაში ვინახავთ მიმდინარე თრექინგს.
     @PostMapping("/watch-all-episodes")
     public ResponseEntity<?> watchAllEpisodes(
             @RequestParam String username,
@@ -68,16 +71,10 @@ public class UserTrackingController {
                 .orElseThrow(() -> new RuntimeException("User not found"))
                 .getId();
 
-        // დაზღვევისთვის ჯერ ვშლით ძველებს, რომ დუბლიკატები არ შეიქმნას
         episodeRepository.deleteByUserIdAndShowId(userId, showId);
-
-        // აქ შეგვიძლია ჩავწეროთ ერთი "სპეციალური" ჩანაწერი (მაგალითად სეზონი 0, ეპიზოდი 0) რომელიც მიანიშნებს რომ ყველაფერი ნანახია,
-        // ან უბრალოდ დავაბრუნოთ წარმატება, რადგან COMPLETED სტატუსი თავისთავად ნიშნავს რომ ყველაფერი ნანახია!
         return ResponseEntity.ok("All episodes marked as watched");
     }
 
-    // 🔴 ახალი ენდფოინთი: ყველა ეპიზოდის ამოშლა ნანახებიდან (Unwatched)
-    @Transactional
     @PostMapping("/unwatch-all-episodes")
     public ResponseEntity<?> unwatchAllEpisodes(
             @RequestParam String username,
@@ -87,9 +84,7 @@ public class UserTrackingController {
                 .orElseThrow(() -> new RuntimeException("User not found"))
                 .getId();
 
-        // ვშლით ამ იუზერის ყველა ნანახ ეპიზოდს ამ სერიალისთვის
         episodeRepository.deleteByUserIdAndShowId(userId, showId);
-
         return ResponseEntity.ok("All episodes marked as unwatched");
     }
 
@@ -150,7 +145,14 @@ public class UserTrackingController {
                 .getId();
 
         UserShowStatus showStatus = statusRepository.findByUserIdAndShowId(userId, showId)
-                .orElse(new UserShowStatus(userId, showId, null));
+                .orElseGet(() -> {
+                    UserShowStatus newStatusObj = new UserShowStatus();
+                    newStatusObj.setUserId(userId);
+                    newStatusObj.setShowId(showId);
+                    newStatusObj.setStatus(null);
+                    newStatusObj.setFavorite(false);
+                    return newStatusObj;
+                });
 
         showStatus.setFavorite(!showStatus.isFavorite());
         statusRepository.save(showStatus);
