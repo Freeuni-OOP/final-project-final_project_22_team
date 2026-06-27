@@ -267,48 +267,6 @@
     margin-top: 6px;
 }
 
-/* ---------- recent showdowns ---------- */
-.lp-showdown-card {
-    display: flex;
-    flex-direction: column;
-}
-
-.lp-showdown-image {
-    width: 100%;
-    aspect-ratio: 16 / 9;
-    border-radius: 6px;
-    background: linear-gradient(160deg, rgba(91, 141, 239, 0.25), rgba(155, 89, 182, 0.2));
-    border: 1px solid rgba(255, 255, 255, 0.06);
-    position: relative;
-    margin-bottom: 12px;
-}
-
-.lp-showdown-badge {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    background: #00e054;
-    color: #10141a;
-    font-size: 0.65rem;
-    font-weight: 800;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    padding: 3px 8px;
-    border-radius: 4px;
-}
-
-.lp-showdown-title {
-    color: #ffffff;
-    font-weight: 700;
-    font-size: 1.05rem;
-}
-
-.lp-showdown-subtitle {
-    color: #7c93a8;
-    font-size: 0.85rem;
-    margin-top: 4px;
-}
-
 /* ---------- responsive ---------- */
 @media (max-width: 880px) {
     .lp-grid-3 {

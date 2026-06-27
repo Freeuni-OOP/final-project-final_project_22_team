@@ -33,18 +33,6 @@ const CREW_PICKS = [
     { title: 'you seem pretty sad for a girl' },
 ];
 
-const RECENT_SHOWDOWNS = [
-    { title: 'Bright Lights', subtitle: 'Best Las Vegas films', inProgress: true },
-    { title: 'Love Lies Bleeding', subtitle: 'Best "be gay, do crime" films' },
-    { title: "Short 'n' Sweet", subtitle: 'Best adaptation of short to feature' },
-];
-
-const CREW_LISTS = [
-    { title: 'Sad girls in love starter pack' },
-    { title: 'Every film available on Letterboxd Video Store' },
-    { title: "Under The Hood: A Century's Worth of Robin Hood On Screen" },
-];
-
 const AVATAR_COLORS = ['#00b4a2', '#e85d75', '#f2b134', '#5b8def', '#9b59b6', '#2ecc71'];
 
 function colorForName(name) {
@@ -201,33 +189,6 @@ export default function ListsPage() {
                     </section>
                 </div>
 
-                <section className="lp-section">
-                    <div className="lp-section-header">
-                        <span className="lp-kicker">Recent Showdowns</span>
-                        <span className="lp-section-link">More</span>
-                    </div>
-                    <div className="lp-grid-3">
-                        {RECENT_SHOWDOWNS.map((item, i) => (
-                            <div key={i} className="lp-showdown-card">
-                                <div className="lp-showdown-image">
-                                    {item.inProgress && <span className="lp-showdown-badge">In Progress</span>}
-                                </div>
-                                <div className="lp-showdown-title">{item.title}</div>
-                                <div className="lp-showdown-subtitle">{item.subtitle}</div>
-                            </div>
-                        ))}
-                    </div>
-                </section>
-
-                <section className="lp-section">
-                    <div className="lp-section-header">
-                        <span className="lp-kicker">Crew Lists</span>
-                        <span className="lp-section-link">More</span>
-                    </div>
-                    <div className="lp-grid-3">
-                        {CREW_LISTS.map((item, i) => <ListCard key={i} item={item} />)}
-                    </div>
-                </section>
             </main>
         </div>
     );
