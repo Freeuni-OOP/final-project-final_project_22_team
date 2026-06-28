@@ -41,7 +41,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/shows/**").permitAll()
-                        // 🔒 ტრექინგი ახლა უკვე დაცულია და სჭირდება ვალიდური ტოკენი
+                        .requestMatchers("/api/log/**").permitAll()
                         .requestMatchers("/api/tracking/**").authenticated()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/friends/**").permitAll()

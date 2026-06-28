@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { PlusCircle, Bell } from 'lucide-react';
+import LogModal from './LogModal';
 import '../style/Header.css';
 
 export default function Header() {
     const navigate = useNavigate();
     const location = useLocation();
     const [searchQuery, setSearchQuery] = useState('');
+    const [showLog, setShowLog] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
     const [recommendations, setRecommendations] = useState([]);
     const [isBellOpen, setIsBellOpen] = useState(false);
@@ -88,7 +90,6 @@ export default function Header() {
         navigate(`/shows?${params.toString()}`);
     };
 
-    // დამხმარე ფუნქცია ავატარის ფერისთვის (რომ პირველ სურათზე მწვანე "S" როა, ისე დარჩეს)
     const getAvatarColor = (name) => {
         if (!name) return '#00b4a2';
         const colors = ['#00b4a2', '#e85d75', '#f2b134', '#5b8def'];
@@ -122,7 +123,6 @@ export default function Header() {
                 <div className="header-right">
                     {username ? (
                         <>
-                            {/* ზარი და ჩამოსაშლელი Dropdown */}
                             <div className="header-bell-container" ref={bellRef} style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
                                 <div className="header-bell-wrapper" onClick={handleBellClick} style={{ cursor: 'pointer', position: 'relative', display: 'flex', alignItems: 'center' }}>
                                     <Bell size={20} className="header-bell-icon" style={{ color: '#9ab3c8', transition: 'color 0.2s' }} />
@@ -155,7 +155,7 @@ export default function Header() {
                                 )}
                             </div>
 
-                            <button className="header-log-btn" onClick={() => navigate('/log')}>
+                            <button className="header-log-btn" onClick={() => setShowLog(true)}>
                                 <PlusCircle size={16} />
                                 <span>LOG</span>
                             </button>
@@ -175,6 +175,8 @@ export default function Header() {
                     )}
                 </div>
             </div>
+
+            {showLog && <LogModal onClose={() => setShowLog(false)} />}
         </header>
     );
 }
