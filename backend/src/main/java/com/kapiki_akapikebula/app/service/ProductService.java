@@ -21,7 +21,7 @@ public class ProductService {
         List<ShopProducts> listings = shopProductsRep.findByProductIdOrderByPriceAsc(productId);
 
         if (listings.isEmpty()) {
-            throw new IllegalArgumentException("Product with ID " + productId + " not found or has no listings.");
+            throw new RuntimeException("Product listings not found for ID: " + productId);
         }
         
         return listings.stream()
