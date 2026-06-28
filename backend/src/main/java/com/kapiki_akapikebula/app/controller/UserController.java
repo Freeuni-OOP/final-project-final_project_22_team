@@ -1,4 +1,4 @@
-package com.kapiki_akapikebula.app.controler;
+package com.kapiki_akapikebula.app.controller;
 
 import com.kapiki_akapikebula.app.dto.AuthResponse;
 import com.kapiki_akapikebula.app.dto.LoginRequest;
@@ -11,7 +11,8 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/auth")
-public class UserControler {
+public class UserController {
+
     @Autowired
     private UserService userService;
 
@@ -20,8 +21,10 @@ public class UserControler {
         try {
             UserResponse savedUser = userService.registerUser(request);
             return ResponseEntity.ok(savedUser);
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage()); //for  error
+            return ResponseEntity.internalServerError().body("An unexpected error occurred during registration."); //er
         }
     }
 
@@ -30,8 +33,10 @@ public class UserControler {
         try {
             String token = userService.loginUser(request);
             return ResponseEntity.ok(new AuthResponse(token));
+        } catch (RuntimeException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage()); //for error
+            return ResponseEntity.internalServerError().body("An unexpected error occurred during login.");
         }
     }
 }
