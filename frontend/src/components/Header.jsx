@@ -46,7 +46,11 @@ export default function Header() {
             headers: { Authorization: `Bearer ${token}` }
         })
             .then(res => res.ok ? res.json() : [])
-            .then(data => setRecommendations(data))
+            .then(data => {
+                // ზარში ვტოვებთ მხოლოდ წაუკითხავ (false) ნოტიფიკაციებს
+                const unreadOnly = data.filter(rec => !rec.read && !rec.isRead);
+                setRecommendations(unreadOnly);
+            })
             .catch(err => console.error("Error fetching recommendations:", err));
     };
 
@@ -66,21 +70,36 @@ export default function Header() {
         return () => document.removeEventListener("mousedown", handleClickOutside);
     }, []);
 
+    // 🟢 სუფთა კლიკი ზარზე - არაფერს არ ნიშნავს მასიურად წაკითხულად
     const handleBellClick = () => {
         if (!isBellOpen) {
             fetchRecommendations();
             setIsBellOpen(true);
-            if (unreadCount > 0) {
-                fetch(`https://localhost:8443/api/tracking/recommendations/mark-read?username=${username}`, {
-                    method: 'POST',
-                    headers: { Authorization: `Bearer ${token}` }
-                })
-                    .then(res => { if (res.ok) setUnreadCount(0); })
-                    .catch(err => console.error("Error marking read:", err));
-            }
         } else {
             setIsBellOpen(false);
         }
+    };
+
+    // 🟢 ახალი ფუნქცია: მხოლოდ კონკრეტული ნოტიფიკაციის წაკითხვა ID-ით
+    const handleNotificationClick = (rec) => {
+        setIsBellOpen(false);
+
+        fetch(`https://localhost:8443/api/tracking/recommendations/read?id=${rec.id}`, {
+            method: 'POST',
+            headers: { Authorization: `Bearer ${token}` }
+        })
+            .then(res => {
+                if (res.ok) {
+                    // მომენტალურად ვაქრობთ სიიდან ვიზუალურად
+                    setRecommendations(prev => prev.filter(item => item.id !== rec.id));
+                    // ვაკლებთ ბეიჯის ციფრს
+                    setUnreadCount(prev => Math.max(0, prev - 1));
+                }
+            })
+            .catch(err => console.error("Error marking recommendation read:", err));
+
+        // გადავყავართ სერიალზე
+        navigate(`/shows/${rec.showId}`);
     };
 
     const handleSearchSubmit = (e) => {
@@ -143,11 +162,33 @@ export default function Header() {
                                                 <div style={{ padding: '15px', textAlign: 'center', color: '#8b949e', fontSize: '12px' }}>No new recommendations</div>
                                             ) : (
                                                 recommendations.slice(0, 5).map((rec) => (
-                                                    <div key={rec.id} onClick={() => { setIsBellOpen(false); navigate(`/shows/${rec.showId}`); }} style={{ padding: '10px 14px', borderBottom: '1px solid rgba(255,255,255,0.02)', cursor: 'pointer', display: 'flex', flexDirection: 'column', gap: '2px', transition: 'background 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'} onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}>
-                                                        <span style={{ fontSize: '12px', color: '#c9d1d9' }}><strong>{rec.senderUsername}</strong> recommended:</span>
-                                                        <span style={{ fontSize: '12px', color: '#00ffd5', fontWeight: '500' }}>{rec.showName}</span>
-                                                        {rec.comment && <span style={{ fontSize: '11px', color: '#8b949e', fontStyle: 'italic' }}>"{rec.comment}"</span>}
-                                                    </div>
+                                                        <div
+                                                            key={rec.id}
+                                                            onClick={() => handleNotificationClick(rec)}
+                                                            style={{
+                                                                padding: '10px 14px',
+                                                                borderBottom: '1px solid rgba(255,255,255,0.02)',
+                                                                cursor: 'pointer',
+                                                                display: 'flex',
+                                                                flexDirection: 'column',
+                                                                gap: '2px',
+                                                                transition: 'background 0.2s'
+                                                            }}
+                                                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(255,255,255,0.03)'}
+                                                            onMouseLeave={(e) => e.currentTarget.style.background = 'transparent'}
+                                                        >
+                                                            <span style={{ fontSize: '12px', color: '#c9d1d9' }}>
+                                                                <strong>{rec.senderUsername}</strong> recommended:
+                                                            </span>
+                                                            <span style={{ fontSize: '12px', color: '#00ffd5', fontWeight: '500' }}>
+                                                                {rec.showName}
+                                                            </span>
+                                                            {rec.comment && (
+                                                                <span style={{ fontSize: '11px', color: '#8b949e', fontStyle: 'italic' }}>
+                                                                    "{rec.comment}"
+                                                                </span>
+                                                        )}
+                                                        </div>
                                                 ))
                                             )}
                                         </div>
