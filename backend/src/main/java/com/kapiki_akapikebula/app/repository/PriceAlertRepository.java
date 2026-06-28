@@ -17,6 +17,6 @@ public interface PriceAlertRepository extends JpaRepository<PriceAlert, Long> {
 
     Optional<PriceAlert> findByUserIdAndProductId(Long userId, Long productId);
 
-    @Query("SELECT pa FROM PriceAlert pa WHERE pa.productId = :productId AND pa.targetPrice >= :currentPrice")
+    @Query("SELECT pa FROM PriceAlert pa WHERE pa.product.id = :productId AND pa.targetPrice >= :currentPrice")
     List<PriceAlert> findTriggeredAlerts(@Param("productId") Long productId, @Param("currentPrice") BigDecimal currentPrice);
 }

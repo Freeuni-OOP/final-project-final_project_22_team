@@ -30,4 +30,7 @@ public class PriceAlert {
 
     @Column(name = "is_triggered", nullable = false)
     private boolean isTriggered;
+
+    @Column(name = "last_notification_price")
+    private BigDecimal lastNotificationPrice;
 }

@@ -13,7 +13,8 @@ public class WatchlistResponse {
     private Long alertId;
     private Long productId;
     private String productName;
-    private String ProductImageUrl;
+    private String productImageUrl;
     private BigDecimal currentPrice;
     private BigDecimal targetPrice;
+    private boolean triggered;
 }
