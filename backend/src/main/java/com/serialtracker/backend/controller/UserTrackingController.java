@@ -176,6 +176,11 @@ public class UserTrackingController {
             @RequestParam String showName,
             @RequestParam(required = false) String comment) {
 
+        boolean alreadyRecommended = recommendationRepository.existsBySenderUsernameAndTargetUsernameAndShowId(senderUsername, targetUsername, showId);
+        if (alreadyRecommended) {
+            return ResponseEntity.badRequest().body("You have already recommended this show to this friend!");
+        }
+
         Recommendation rec = new Recommendation(senderUsername, targetUsername, showId, showName, comment);
         recommendationRepository.save(rec);
         return ResponseEntity.ok("Recommendation sent successfully!");
@@ -188,11 +193,19 @@ public class UserTrackingController {
     }
 
     @PostMapping("/recommendations/read")
-    public ResponseEntity<?> markAsRead(@RequestParam String username) {
-        List<Recommendation> unread = recommendationRepository.findByTargetUsernameAndIsReadFalse(username);
-        unread.forEach(r -> r.setRead(true));
-        recommendationRepository.saveAll(unread);
-        return ResponseEntity.ok("Notifications marked as read");
+    public ResponseEntity<?> markAsRead(@RequestParam Long id) {
+        Recommendation rec = recommendationRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Recommendation not found"));
+
+        rec.setRead(true); // ან rec.setIsRead(true); გააჩნია როგორ გიწერია ენთითიში
+        recommendationRepository.save(rec);
+        return ResponseEntity.ok("Notification marked as read");
+    }
+
+    @GetMapping("/recommendations/sent")
+    public ResponseEntity<?> getSentRecommendations(@RequestParam String username) {
+        List<Recommendation> sentRecs = recommendationRepository.findBySenderUsername(username);
+        return ResponseEntity.ok(sentRecs);
     }
 
     @GetMapping("/recommendations/unread-count")

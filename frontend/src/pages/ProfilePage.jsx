@@ -324,9 +324,31 @@ export default function ProfilePage() {
                                                     {rec.showName}
                                                 </h4>
                                                 {rec.comment && (
-                                                    <p style={{ margin: '0', fontSize: '11px', color: '#c9d1d9', fontStyle: 'italic', borderLeft: '2px solid rgba(0, 255, 213, 0.4)', paddingLeft: '6px' }}>
-                                                        "{rec.comment}"
-                                                    </p>
+                                                    <div
+                                                        style={{
+                                                            maxHeight: '54px', // 🟢 ფიქსირებული მაქსიმალური სიმაღლე (დაახლოებით 3 ხაზი)
+                                                            overflowY: 'auto', // 🟢 თუ ტექსტი დიდია, ჩნდება შიდა სქროლი
+                                                            margin: '4px 0 0 0',
+                                                            paddingLeft: '6px',
+                                                            borderLeft: '2px solid rgba(0, 255, 213, 0.4)',
+                                                        }}
+                                                        // პატარა ჰაკი, რომ სქროლი ვიზუალურად ძალიან თხელი და უჩინარი იყოს
+                                                        className="rec-comment-scroll"
+                                                    >
+                                                        <p
+                                                            style={{
+                                                                margin: '0',
+                                                                fontSize: '11px',
+                                                                color: '#c9d1d9',
+                                                                fontStyle: 'italic',
+                                                                wordBreak: 'break-word',
+                                                                overflowWrap: 'break-word',
+                                                                lineHeight: '18px'
+                                                            }}
+                                                        >
+                                                            "{rec.comment}"
+                                                        </p>
+                                                    </div>
                                                 )}
                                             </div>
                                         ))}

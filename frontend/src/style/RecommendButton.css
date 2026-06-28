@@ -1,29 +1,39 @@
 .recommend-wrapper {
-    display: inline-block;
-    margin-top: 10px;
+    display: block;
+    width: 100%;
+    margin-top: 10px; /* ზუსტად ემთხვევა შენს დაშორებებს */
 }
 
-/* ✉️ პრემიუმ ნეონის ღილაკი სერიალის გვერდისთვის */
 .recommend-main-btn {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(0, 255, 213, 0.25);
-    color: #00ffd5;
-    padding: 10px 20px;
-    font-size: 14px;
-    font-weight: 600;
-    border-radius: 20px;
+    /* 🟢 ზუსტი ზომები და ფორმა .design-btn-იდან */
+    width: 100%;
+    padding: 10px;
+    border-radius: 8px; /* შევცვალეთ 12-დან 8-ზე, როგორც შენს კოდშია */
+    font-weight: bold;
+    font-size: 12px;
     cursor: pointer;
+    border: none;
     display: flex;
     align-items: center;
-    gap: 8px;
-    transition: all 0.25s ease-in-out;
+    justify-content: center;
+    box-sizing: border-box;
+    font-family: sans-serif;
+    transition: background 0.2s;
+
+    /* 🟢 ზუსტი ფერები .list-btn-იდან */
+    background-color: #24303c;
+    color: #9ab;
 }
 
+/* Hover ეფექტი, რომელიც ოდნავ აცოცხლებს ღილაკს */
 .recommend-main-btn:hover {
-    background: #00ffd5;
-    color: #0d1117;
-    box-shadow: 0 0 15px rgba(0, 255, 213, 0.35);
-    transform: translateY(-1px);
+    background-color: #2d3b4a; /* ოდნავ ღია ტონი იგივე ფერის */
+    color: #ffffff; /* Hover-ზე ტექსტი თეთრდება */
+}
+
+/* კლიკის ეფექტი */
+.recommend-main-btn:active {
+    transform: scale(0.99);
 }
 
 /* ოვერლეი */
@@ -134,3 +144,56 @@
 
 .rec-empty { text-align: center; color: #8b949e; font-size: 13px; padding: 10px; }
 
+/* ==========================================================================
+   რეკომენდაციების ახალი Hover ეფექტები (დაამატე ფაილის ბოლოში)
+   ========================================================================== */
+
+/* ტექსტის დამცავი - რომ კომენტარი აღარასოდეს გავარდეს ქარდიდან */
+.rec-comment-text {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+    margin: 0;
+}
+
+/* Hover-ზე გამოსახათი ჩარჩოს ანიმაცია (Fade-in ეფექტით) */
+@keyframes fadeInTooltip {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.rec-hover-tooltip {
+    animation: fadeInTooltip 0.2s ease-out forwards;
+}
+
+/* თუ გინდა scrollbar-ი მეგობრების სიაში უფრო ლამაზი იყოს */
+.rec-list::-webkit-scrollbar {
+    width: 6px;
+}
+.rec-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+.rec-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 213, 0.2);
+    border-radius: 4px;
+}
+.rec-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 213, 0.4);
+}
+
+.rec-comment-scroll::-webkit-scrollbar {
+    width: 3px; /* ძალიან ვიწრო სქროლი */
+}
+.rec-comment-scroll::-webkit-scrollbar-thumb {
+    background: rgba(0, 255, 213, 0.2);
+    border-radius: 2px;
+}
+.rec-comment-scroll::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 255, 213, 0.5);
+}

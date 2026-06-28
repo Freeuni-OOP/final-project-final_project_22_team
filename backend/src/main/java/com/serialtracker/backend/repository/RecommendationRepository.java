@@ -10,4 +10,8 @@ public interface RecommendationRepository extends JpaRepository<Recommendation, 
 
     // ჰედერის ნოტიფიკაციებისთვის: მხოლოდ წაუკითხავი რექვესტები
     List<Recommendation> findByTargetUsernameAndIsReadFalse(String targetUsername);
+
+    List<Recommendation> findBySenderUsername(String senderUsername);
+
+    boolean existsBySenderUsernameAndTargetUsernameAndShowId(String senderUsername, String targetUsername, int showId);
 }
