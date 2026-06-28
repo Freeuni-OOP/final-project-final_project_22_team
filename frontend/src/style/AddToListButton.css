@@ -1,0 +1,106 @@
+.atl-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 9999;
+}
+
+.atl-modal {
+    background: rgba(18, 22, 30, 0.98);
+    border: 1px solid rgba(0, 255, 213, 0.15);
+    border-radius: 16px;
+    width: 380px;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+}
+
+.atl-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+}
+
+.atl-header h3 {
+    margin: 0;
+    font-size: 15px;
+    color: #fff;
+    line-height: 1.4;
+}
+
+.atl-neon-title { color: #00ffd5; }
+
+.atl-close {
+    background: none;
+    border: none;
+    color: #8b949e;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.atl-close:hover { color: #ff4444; }
+
+.atl-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 280px;
+    overflow-y: auto;
+}
+
+.atl-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.01);
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.02);
+}
+
+.atl-list-name {
+    color: #c9d1d9;
+    font-size: 13px;
+}
+
+.atl-action-btn {
+    background: rgba(0, 255, 213, 0.08);
+    border: 1px solid #00ffd5;
+    color: #00ffd5;
+    padding: 5px 12px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+}
+.atl-action-btn:hover { background: #00ffd5; color: #0d1117; }
+
+.atl-action-btn.done {
+    background: rgba(255, 255, 255, 0.04) !important;
+    border-color: rgba(255, 255, 255, 0.08) !important;
+    color: #58a6ff !important;
+    cursor: not-allowed;
+}
+
+.atl-empty {
+    text-align: center;
+    color: #8b949e;
+    font-size: 13px;
+    padding: 10px;
+}
+
+.atl-create-link {
+    color: #00ffd5;
+    cursor: pointer;
+    text-decoration: underline;
+}
