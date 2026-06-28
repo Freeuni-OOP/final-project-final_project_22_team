@@ -267,6 +267,168 @@
     margin-top: 6px;
 }
 
+/* ---------- my lists (real backend data) ---------- */
+.lp-section-empty {
+    color: #5f758a;
+    font-size: 0.85rem;
+    padding: 10px 0;
+}
+
+.lp-panel-message {
+    color: #e85d75;
+    font-size: 0.82rem;
+    margin-top: 8px;
+}
+
+.lp-pill {
+    background: rgba(255, 255, 255, 0.08);
+    color: #9ab;
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    padding: 2px 8px;
+    border-radius: 10px;
+}
+
+.lp-create-form {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+
+.lp-add-input {
+    background: #1c2530;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    color: #dce6ef;
+    border-radius: 6px;
+    padding: 8px 12px;
+    font-size: 0.85rem;
+    flex: 1;
+    min-width: 160px;
+}
+
+.lp-add-input:focus {
+    outline: none;
+    border-color: #00b4a2;
+}
+
+.lp-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #9ab;
+    font-size: 0.82rem;
+}
+
+.lp-add-btn {
+    background: #00b4a2;
+    color: #07181a;
+    border: none;
+    font-weight: 700;
+    font-size: 0.82rem;
+    border-radius: 6px;
+    padding: 8px 16px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.lp-add-btn:hover {
+    background: #00cfba;
+}
+
+.lp-my-lists-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+.lp-my-list-card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 10px;
+    padding: 16px;
+}
+
+.lp-my-list-top {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    cursor: pointer;
+}
+
+.lp-my-list-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.lp-my-list-delete {
+    background: transparent;
+    border: 1px solid rgba(232, 93, 117, 0.4);
+    color: #e85d75;
+    font-size: 0.72rem;
+    font-weight: 700;
+    border-radius: 6px;
+    padding: 6px 10px;
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+}
+
+.lp-my-list-delete:hover {
+    background: rgba(232, 93, 117, 0.12);
+}
+
+.lp-my-list-detail {
+    margin-top: 16px;
+    padding-top: 16px;
+    border-top: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.lp-my-list-items {
+    list-style: none;
+    margin: 0 0 12px;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.lp-my-list-item-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #dce6ef;
+    font-size: 0.82rem;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 6px;
+    padding: 6px 10px;
+}
+
+.lp-mini-remove {
+    background: transparent;
+    border: none;
+    color: #5f758a;
+    font-size: 0.72rem;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.lp-mini-remove:hover {
+    color: #e85d75;
+}
+
+.lp-add-show-form {
+    display: flex;
+    gap: 8px;
+}
+
 /* ---------- responsive ---------- */
 @media (max-width: 880px) {
     .lp-grid-3 {
@@ -274,6 +436,10 @@
     }
 
     .lp-two-col {
+        grid-template-columns: 1fr;
+    }
+
+    .lp-my-lists-grid {
         grid-template-columns: 1fr;
     }
 }
