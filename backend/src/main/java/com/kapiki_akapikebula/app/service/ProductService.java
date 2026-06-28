@@ -20,6 +20,10 @@ public class ProductService {
     public List<ProductListingDto> getProductListings(long productId) {
         List<ShopProducts> listings = shopProductsRep.findByProductIdOrderByPriceAsc(productId);
 
+        if (listings.isEmpty()) {
+            throw new IllegalArgumentException("Product with ID " + productId + " not found or has no listings.");
+        }
+        
         return listings.stream()
                 .map(listing -> new ProductListingDto(
                         listing.getShop() != null ? listing.getShop().getName() : "Unknown Shop",
