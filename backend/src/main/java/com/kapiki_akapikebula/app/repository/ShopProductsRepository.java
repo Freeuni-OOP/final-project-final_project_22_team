@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface ShopProductsRepository extends JpaRepository<ShopProducts, Long> {
     List<ShopProducts> findByProductIdOrderByPriceAsc(long productId);
+    List<ShopProducts> findByProductId(Long productId);
 }
