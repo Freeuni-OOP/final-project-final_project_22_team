@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -25,7 +26,8 @@ public class PriceHistory {
     @Column(nullable = false)
     private BigDecimal price;
 
-    @Column(name = "recorded_at", insertable = false, updatable = false)
+    @Column(name = "recorded_at", nullable = false, updatable = false)
+    @CreationTimestamp
     private LocalDateTime recordedAt;
 
 }
