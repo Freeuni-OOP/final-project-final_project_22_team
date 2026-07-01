@@ -1,5 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="JAVA_MODULE" version="4">
+  <component name="FacetManager">
+    <facet type="jpa" name="JPA">
+      <configuration>
+        <setting name="validation-enabled" value="true" />
+        <datasource-mapping>
+          <factory-entry name="final-project-kapiki-akapikebula" value="bec7d09f-29ab-469f-b597-eb590aed835b" />
+        </datasource-mapping>
+        <naming-strategy-map />
+      </configuration>
+    </facet>
+  </component>
   <component name="NewModuleRootManager" inherit-compiler-output="true">
     <exclude-output />
     <content url="file://$MODULE_DIR$">
@@ -195,5 +206,39 @@
     </orderEntry>
     <orderEntry type="library" name="Maven: org.apache.tomcat.embed:tomcat-embed-core:10.1.54" level="project" />
     <orderEntry type="library" name="Maven: io.jsonwebtoken:jjwt-api:0.11.5" level="project" />
+    <orderEntry type="module-library" scope="PROVIDED">
+      <library>
+        <CLASSES>
+          <root url="jar://$MAVEN_REPOSITORY$/org/projectlombok/lombok/1.18.30/lombok-1.18.30.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-config:6.5.10" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-crypto:6.5.10" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-web:6.5.10" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-beans:6.2.18" level="project" />
+    <orderEntry type="library" name="Maven: jakarta.persistence:jakarta.persistence-api:3.1.0" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.data:spring-data-jpa:3.5.11" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.data:spring-data-commons:3.5.11" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework:spring-core:6.2.18" level="project" />
+    <orderEntry type="library" name="Maven: org.springframework.security:spring-security-core:6.5.10" level="project" />
+    <orderEntry type="module-library" scope="TEST">
+      <library name="testng">
+        <CLASSES>
+          <root url="jar://$MAVEN_REPOSITORY$/org/testng/testng/7.1.0/testng-7.1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/beust/jcommander/1.72/jcommander-1.72.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/google/inject/guice/4.1.0/guice-4.1.0-no_aop.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/javax/inject/javax.inject/1/javax.inject-1.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/aopalliance/aopalliance/1.0/aopalliance-1.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/com/google/guava/guava/19.0/guava-19.0.jar!/" />
+          <root url="jar://$MAVEN_REPOSITORY$/org/yaml/snakeyaml/1.21/snakeyaml-1.21.jar!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="library" scope="TEST" name="Maven: org.junit.jupiter:junit-jupiter-api:5.12.2" level="project" />
   </component>
 </module>
