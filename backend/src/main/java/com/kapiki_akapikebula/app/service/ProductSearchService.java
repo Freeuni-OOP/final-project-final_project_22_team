@@ -3,9 +3,7 @@ package com.kapiki_akapikebula.app.service;
 import com.kapiki_akapikebula.app.dto.ProductListingDto;
 import com.kapiki_akapikebula.app.dto.ProductSearchResult;
 import com.kapiki_akapikebula.app.model.Product;
-import com.kapiki_akapikebula.app.model.ShopProducts;
 import com.kapiki_akapikebula.app.repository.ProductRepository;
-import com.kapiki_akapikebula.app.repository.ShopProductsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
@@ -20,11 +18,9 @@ import java.util.Set;
 public class ProductSearchService {
 
     private final ProductRepository productRepository;
-    private final ShopProductsRepository shopProductsRepository;
 
-    // Only these two field names are allowed for sorting.
-    // This prevents a user from passing "DROP TABLE" as a sort field.
-    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("name", "brand");
+    // Only these field names are accepted for sorting — anything else defaults to "name"
+    private static final Set<String> ALLOWED_SORT_FIELDS = Set.of("name", "brand", "price");
 
     public Page<ProductSearchResult> search(
             String query,
@@ -35,57 +31,63 @@ public class ProductSearchService {
             int page,
             int size
     ) {
+        // --- Step 1: Clean up inputs ---
 
-        // If the user sent an empty string, treat it as no search term
+        // Treat blank search term as "no filter" so the query skips it
         String keyword = (query == null || query.isBlank()) ? null : query.trim();
 
-        // If someone passes an invalid sort field, fall back to "name"
-        String sortField = ALLOWED_SORT_FIELDS.contains(sortBy) ? sortBy : "name";
+        // Reject unknown sort fields, fall back to "name"
+        String rawSortField = ALLOWED_SORT_FIELDS.contains(sortBy) ? sortBy : "name";
 
-        // Convert "asc"/"desc" string into Spring's Sort.Direction enum
-        Sort.Direction direction;
-        if ("desc".equalsIgnoreCase(sortDir)) direction = Sort.Direction.DESC;
-        else direction = Sort.Direction.ASC;
+        // "price" lives on ShopProducts (alias sp), not Product (alias p),
+        // so we tell SQL to look at sp.price specifically
+        String sortField = "price".equals(rawSortField) ? "sp.price" : rawSortField;
 
+        // Convert the "asc"/"desc" string into Spring's internal type
+        Sort.Direction direction = "desc".equalsIgnoreCase(sortDir)
+                ? Sort.Direction.DESC
+                : Sort.Direction.ASC;
 
-        // Math.max and Math.min guard against negative pages or giant page sizes
+        // --- Step 2: Build pagination settings ---
+
+        // PageRequest bundles together: which page, how many results, and sort order
+        // Math.max/min guard against bad input (negative page, huge page size)
         Pageable pageable = PageRequest.of(
-                Math.max(page, 0),       // page can't be negative
-                Math.min(size, 100),     // max 100 results per page
+                Math.max(page, 0),
+                Math.min(size, 100),
                 Sort.by(direction, sortField)
         );
 
-        // Fetch matching products from the DB
+        // --- Step 3: One SQL query — products + their shop listings together ---
 
-        // This calls the @Query in ProductRepository
+        // JOIN FETCH in the repository means shop listings are loaded in the same
+        // query, so no extra DB calls happen inside the loop below
         Page<Product> matchingProducts = productRepository.search(
                 keyword, minPrice, maxPrice, pageable
         );
 
-        // For each product, fetch its shop listings and build the result
+        // --- Step 4: Convert each Product entity into a ProductSearchResult DTO ---
 
         List<ProductSearchResult> results = matchingProducts.getContent().stream()
                 .map(product -> {
 
-                    // Get all shops selling this product, cheapest first
-                    List<ShopProducts> shopListings = shopProductsRepository.findByProductIdOrderByPriceAsc(product.getId());
+                    // product.getShopProducts() does NOT trigger a new DB call here —
+                    // the data was already loaded by JOIN FETCH above
+                    List<ProductListingDto> listingDtos = product.getShopProducts().stream()
+                            .sorted(Comparator.comparing(sp -> sp.getPrice()))
+                            .map(sp -> new ProductListingDto(
+                                    sp.getShop().getName(),
+                                    sp.getPrice(),
+                                    sp.getStockStatus(),
+                                    sp.getProductUrl()
+                            ))
+                            .toList();
 
-                    // Convert each ShopProducts row into a ProductListingDto
-                    List<ProductListingDto> listingDtos = shopListings.stream()
-                            .map(listing -> new ProductListingDto(
-                                    listing.getShop().getName(),
-                                    listing.getPrice(),
-                                    listing.getStockStatus(),
-                                    listing.getProductUrl()
-                            )).toList();
+                    // List is sorted cheapest first, so index 0 is the lowest price
+                    BigDecimal lowestPrice = listingDtos.isEmpty()
+                            ? null
+                            : listingDtos.get(0).price();
 
-                    // Since listings are already sorted cheapest first,
-                    // the first one has the lowest price
-                    BigDecimal lowestPrice;
-                    if (shopListings.isEmpty()) lowestPrice = null;
-                    else lowestPrice = shopListings.get(0).getPrice();
-
-                    // Bundle everything into one result object
                     return new ProductSearchResult(
                             product.getId(),
                             product.getName(),
@@ -94,21 +96,11 @@ public class ProductSearchService {
                             lowestPrice,
                             listingDtos
                     );
-                }).toList();
+                })
+                .toList();
 
-        // Sort by price manually
-        if ("price".equalsIgnoreCase(sortBy)) {
-            Comparator<ProductSearchResult> byLowestPrice = Comparator.comparing(
-                    result -> result.lowestPrice() != null ? result.lowestPrice() : BigDecimal.ZERO
-            );
-
-            results = results.stream()
-                    .sorted("desc".equalsIgnoreCase(sortDir) ? byLowestPrice.reversed() : byLowestPrice)
-                    .toList();
-        }
-
-        // Wrap the list back into a Page object so the response includes
-        // pagination info (totalPages, totalElements, etc.)
+        // Wrap results back into a Page so the response includes totalPages,
+        // totalElements etc. — useful for the frontend to build pagination UI
         return new PageImpl<>(results, pageable, matchingProducts.getTotalElements());
     }
 }
