@@ -1131,3 +1131,45 @@ watchlist-poster-grid {
         grid-template-columns: repeat(2, 1fr);
     }
 }
+
+/* მთავარი კონტეინერი პოსტერის ქვეშ */
+.activity-info-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px; /* დაშორება ხაზებს შორის */
+    margin-top: 10px;
+    width: 100%;
+}
+
+/* ხაზი 1: სტატუსის ბლოკი */
+.status-row {
+    display: flex;
+    justify-content: center;
+    width: 100%;
+}
+
+/* ხაზი 2: გული და ვარსკვლავები ერთ რიგში */
+.meta-row {
+    display: flex;
+    flex-direction: row; /* ვსვამთ გვერდიგვერდ */
+    align-items: center;
+    justify-content: center;
+    gap: 10px; /* დაშორება ვარსკვლავებსა და გულს შორის */
+    height: 24px; /* ფიქსირებული სიმაღლე, რომ ცარიელ ქარდებზე სიცარიელე არ დაირღვეს */
+    width: 100%;
+}
+
+/* ვარსკვლავების სტილი */
+.stars-container {
+    color: #ffb400; /* ოქროსფერი ვარსკვლავები */
+    font-size: 14px;
+    letter-spacing: 2px;
+}
+
+/* გულის სტილი */
+.heart-icon {
+    font-size: 16px;
+    display: inline-flex;
+    align-items: center;
+}

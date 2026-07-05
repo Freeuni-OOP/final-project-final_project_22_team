@@ -140,36 +140,37 @@ export default function ProfilePage() {
     const username = decodedToken?.sub;
     const authHeaders = { Authorization: `Bearer ${token}` };
 
-const loadAll = () => {
+    const loadAll = () => {
         if (!username) return;
-        Loading(true);
+        setLoading(true);
 
-        Const authHeaders = { Authorization: `Bearer ${token}` };
+        const authHeaders = { Authorization: `Bearer ${token}` };
 
         Promise.all([
-            Fetch(`${FRIENDS_BASE_URL}?actingUsername=${username}`, { headers: authHeaders }).then(r => (r.ok ? R.json() : [])),
-            Fetch(`${FRIENDS_BASE_URL}/pending?actingUsername=${username}`, { headers: authHeaders }).then(r => (r.ok ? R.json() : [])),
-            Fetch(`${FRIENDS_BASE_URL}/sent?actingUsername=${username}`, { headers: authHeaders }).then(r => (r.ok ? R.json() : [])),
-            Fetch(`${FRIENDS_BASE_URL}/suggestions?actingUsername=${username}`, { headers: authHeaders }).then(r => (r.ok ? R.json() : [])),
-            Fetch(`https://localhost:8443/api/tracking/recommendations?username=${username}`, { headers: authHeaders }).then(r => (r.ok ? R.json() : [])),
-            Fetch(`https://localhost:8443/api/tracking/activity?username=${username}`, { headers: authHeaders }).then(r => (r.ok ? R.json() : [])),
-            Fetch(`https://localhost:8443/api/tracking/watchlist?username=${username}`, { headers: authHeaders }).then(r => (r.ok ? R.json() : []))
+            // შეცვლილია Fetch -> fetch და R.json() -> r.json()
+            fetch(`${FRIENDS_BASE_URL}?actingUsername=${username}`, { headers: authHeaders }).then(r => (r.ok ? r.json() : [])),
+            fetch(`${FRIENDS_BASE_URL}/pending?actingUsername=${username}`, { headers: authHeaders }).then(r => (r.ok ? r.json() : [])),
+            fetch(`${FRIENDS_BASE_URL}/sent?actingUsername=${username}`, { headers: authHeaders }).then(r => (r.ok ? r.json() : [])),
+            fetch(`${FRIENDS_BASE_URL}/suggestions?actingUsername=${username}`, { headers: authHeaders }).then(r => (r.ok ? r.json() : [])),
+            fetch(`https://localhost:8443/api/tracking/recommendations?username=${username}`, { headers: authHeaders }).then(r => (r.ok ? r.json() : [])),
+            fetch(`https://localhost:8443/api/tracking/activity?username=${username}`, { headers: authHeaders }).then(r => (r.ok ? r.json() : [])),
+            fetch(`https://localhost:8443/api/tracking/watchlist?username=${username}`, { headers: authHeaders }).then(r => (r.ok ? r.json() : []))
         ])
             .then(([friendsList, pendingList, sentList, suggestionsList, recsList, activityList, watchlistIds]) => {
-                SetFriends(friendsList || []);
-                SetFriendsCount((friendsList || []).length);
-                SetPending(pendingList || []);
-                SetSent(sentList || []);
-                SetSuggestions(suggestionsList || []);
-                SetRecommendations(recsList || []);
-                SetActivities((activityList || []).sort((a, b) => b.id - a.id));
-                SetWatchlistShowIds(watchlistIds || []);
+                // შეცვლილია SetFriends -> setFriends, და ა.შ. (ყველა სეტერი პატარა ასოთი)
+                setFriends(friendsList || []);
+                setFriendsCount((friendsList || []).length);
+                setPending(pendingList || []);
+                setSent(sentList || []);
+                setSuggestions(suggestionsList || []);
+                setRecommendations(recsList || []);
+                setActivities((activityList || []).sort((a, b) => b.id - a.id));
+                setWatchlistShowIds(watchlistIds || []);
                 (watchlistIds || []).forEach(ensureWatchlistShowInfo);
             })
             .catch(err => console.error("Error loading profile data:", err))
             .finally(() => setLoading(false));
     };
-
     // Mirrors ListDetailPage's per-show info fetch: the watchlist endpoint
     // only returns raw showIds, so poster/title come from a per-id lookup,
     // cached so repeat renders/tab switches don't refetch.
@@ -510,23 +511,34 @@ const loadAll = () => {
                                                         </div>
                                                     </div>
 
-                                                    {/* ინდიკატორები და ბეიჯები ფუტერში */}
-                                                    <div className="pp-poster-footer-info">
-                                                        {act.isLiked && (
-                                                            <span className="pp-poster-like">❤️</span>
-                                                        )}
+                                                    {/* 🟢 ახალი სტრუქტურა: ინდიკატორები და ბეიჯები პოსტერის ქვეშ ორ ხაზად */}
+                                                    <div className="pp-poster-footer-info" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px', marginTop: '10px', width: '100%' }}>
 
-                                                        {act.rating > 0 && (
-                                                            <span className="pp-poster-stars">
-                                {'★'.repeat(Math.round(act.rating))}
-                            </span>
-                                                        )}
-
+                                                        {/* 1. პირველი ხაზი: მხოლოდ სტატუსი */}
                                                         {statusLabel && (
-                                                            <div className="pp-poster-indicator">
-                                <span className={`pp-status-badge ${statusClass}`}>
-                                    {statusLabel}
-                                    </span>
+                                                            <div className="status-row" style={{ display: 'flex', justifyContent: 'center', width: '100%' }}>
+                    <span className={`pp-status-badge ${statusClass}`}>
+                        {statusLabel}
+                    </span>
+                                                            </div>
+                                                        )}
+
+                                                        {/* 2. მეორე ხაზი: ვარსკვლავები და გული ერთ რიგში (გამოჩნდება თუ რომელიმე მაინც არსებობს) */}
+                                                        {(act.isLiked || act.rating > 0) && (
+                                                            <div className="meta-row" style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: '8px', width: '100%', minHeight: '20px' }}>
+
+                                                                {/* ვარსკვლავები */}
+                                                                {act.rating > 0 && (
+                                                                    <span className="pp-poster-stars" style={{ color: '#ffb400', letterSpacing: '1px' }}>
+                            {'★'.repeat(Math.round(act.rating))}
+                        </span>
+                                                                )}
+
+                                                                {/* გული */}
+                                                                {act.isLiked && (
+                                                                    <span className="pp-poster-like" style={{ display: 'inline-flex', alignItems: 'center' }}>❤️</span>
+                                                                )}
+
                                                             </div>
                                                         )}
                                                     </div>
