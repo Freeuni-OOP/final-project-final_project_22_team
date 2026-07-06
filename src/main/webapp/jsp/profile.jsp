@@ -76,4 +76,45 @@
     </form>
 </div>
 
+<%-- Gear checklist section --%>
+<div class="section-card">
+    <h2>My Gear</h2>
+
+    <%-- List of existing gear items --%>
+    <%
+        java.util.List<com.hikebuddy.model.Gear> gearList =
+                (java.util.List<com.hikebuddy.model.Gear>) request.getAttribute("gearList");
+        if (gearList != null && !gearList.isEmpty()) {
+            for (com.hikebuddy.model.Gear gear : gearList) {
+    %>
+    <form method="post" action="${pageContext.request.contextPath}/gear"
+          style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+        <input type="hidden" name="action" value="toggle">
+        <input type="hidden" name="gearId" value="<%= gear.getId() %>">
+        <input type="hidden" name="currentState" value="<%= gear.isChecked() %>">
+        <input type="checkbox"
+            <%= gear.isChecked() ? "checked" : "" %>
+               onchange="this.form.submit()">
+        <span style="<%= gear.isChecked() ? "text-decoration:line-through; color:#aaa;" : "" %>">
+                <%= gear.getName() %>
+            </span>
+    </form>
+    <%
+        }
+    } else {
+    %>
+    <p style="color:#aaa; margin-bottom:16px;">No gear yet. Add your first item below.</p>
+    <%
+        }
+    %>
+
+    <%-- Add new gear form --%>
+    <form method="post" action="${pageContext.request.contextPath}/gear"
+          style="display:flex; gap:10px; margin-top:16px;">
+        <input type="hidden" name="action" value="add">
+        <input type="text" name="name" placeholder="Add gear item..."
+               class="form-group" style="flex:1; margin:0;">
+        <button type="submit" class="btn-green">Add</button>
+    </form>
+</div>
 <%@ include file="footer.jsp" %>
