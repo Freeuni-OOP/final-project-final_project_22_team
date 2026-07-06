@@ -117,4 +117,108 @@
         <button type="submit" class="btn-green">Add</button>
     </form>
 </div>
+
+<%-- Availability calendar section --%>
+<div class="section-card">
+    <h2>My Availability</h2>
+    <p style="color:#666; margin-bottom:16px; font-size:14px;">
+        Click a day to mark/unmark it as available for hiking.
+    </p>
+
+    <%
+        java.util.Set<Integer> availableDays =
+                (java.util.Set<Integer>) request.getAttribute("availableDays");
+        java.time.LocalDate now = java.time.LocalDate.now();
+        int year = now.getYear();
+        int month = now.getMonthValue();
+        int daysInMonth = now.lengthOfMonth();
+        java.time.DayOfWeek firstDayOfWeek = java.time.LocalDate.of(year, month, 1).getDayOfWeek();
+        int startOffset = firstDayOfWeek.getValue() % 7; // Sunday=0
+    %>
+
+    <p style="font-weight:500; margin-bottom:12px;">
+        <%= now.getMonth().getDisplayName(java.time.format.TextStyle.FULL, java.util.Locale.ENGLISH) %>
+        <%= year %>
+    </p>
+
+    <table style="border-collapse:collapse; width:100%;">
+        <tr>
+            <th style="padding:6px; text-align:center; color:#666;">Sun</th>
+            <th style="padding:6px; text-align:center; color:#666;">Mon</th>
+            <th style="padding:6px; text-align:center; color:#666;">Tue</th>
+            <th style="padding:6px; text-align:center; color:#666;">Wed</th>
+            <th style="padding:6px; text-align:center; color:#666;">Thu</th>
+            <th style="padding:6px; text-align:center; color:#666;">Fri</th>
+            <th style="padding:6px; text-align:center; color:#666;">Sat</th>
+        </tr>
+        <tr>
+            <%
+                int col = 0;
+                for (int i = 0; i < startOffset; i++) {
+            %>
+            <td></td>
+            <%
+                    col++;
+                }
+                for (int day = 1; day <= daysInMonth; day++) {
+                    String dateStr = String.format("%d-%02d-%02d", year, month, day);
+                    boolean isAvailable = availableDays != null && availableDays.contains(day);
+                    String bgColor = isAvailable ? "#2d6a4f" : "#f4f6f4";
+                    String txtColor = isAvailable ? "white" : "#2b2b2b";
+            %>
+            <td style="padding:4px; text-align:center;">
+                <form method="post" action="${pageContext.request.contextPath}/calendar"
+                      style="margin:0;">
+                    <input type="hidden" name="date" value="<%= dateStr %>">
+                    <button type="submit"
+                            style="width:36px; height:36px; border-radius:50%; border:none;
+                                    background:<%= bgColor %>; color:<%= txtColor %>;
+                                    cursor:pointer; font-size:13px;">
+                        <%= day %>
+                    </button>
+                </form>
+            </td>
+            <%
+                col++;
+                if (col == 7 && day < daysInMonth) {
+            %>
+        </tr><tr>
+        <%
+                    col = 0;
+                }
+            }
+            while (col < 7) {
+        %>
+        <td></td>
+        <%
+                col++;
+            }
+        %>
+    </tr>
+    </table>
+</div>
+
+<%-- Badges section --%>
+<div class="section-card">
+    <h2>Badges</h2>
+    <%
+        java.util.List<com.hikebuddy.model.Badge> badges =
+                (java.util.List<com.hikebuddy.model.Badge>) request.getAttribute("badges");
+        if (badges != null && !badges.isEmpty()) {
+            for (com.hikebuddy.model.Badge badge : badges) {
+    %>
+    <div style="display:inline-block; background:#ecfdf5; border:1px solid #a7f3d0;
+                    border-radius:8px; padding:10px 16px; margin:6px; font-weight:500;
+                    color:#065f46;">
+        <%= badge.getDisplayName() %>
+    </div>
+    <%
+        }
+    } else {
+    %>
+    <p style="color:#aaa;">Complete hikes and missions to earn badges!</p>
+    <%
+        }
+    %>
+</div>
 <%@ include file="footer.jsp" %>
