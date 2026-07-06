@@ -74,7 +74,7 @@ public class ProfileServlet extends HttpServlet {
             session.setAttribute("user", updatedUser);
 
             // 7. Redirect back to profile (PRG pattern)
-            response.sendRedirect(request.getContextPath() + "/profile");
+            response.sendRedirect(request.getContextPath() + "/profile?success=updated");
 
         } catch (SQLException e) {
             e.printStackTrace();
