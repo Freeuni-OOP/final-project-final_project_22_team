@@ -14,6 +14,12 @@ import com.hikebuddy.dao.GearDAO;
 import com.hikebuddy.model.Gear;
 import java.util.List;
 
+import com.hikebuddy.dao.CalendarDAO;
+import java.util.Set;
+
+import com.hikebuddy.dao.BadgeDAO;
+import com.hikebuddy.model.Badge;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -42,6 +48,17 @@ public class ProfileServlet extends HttpServlet {
             GearDAO gearDAO = new GearDAO();
             List<Gear> gearList = gearDAO.getByUser(user.getId());
             request.setAttribute("gearList", gearList);
+
+            // Load available days for current month
+            CalendarDAO calendarDAO = new CalendarDAO();
+            java.time.LocalDate now = java.time.LocalDate.now();
+            Set<Integer> availableDays = calendarDAO.getAvailableDays(user.getId(), now.getYear(), now.getMonthValue());
+            request.setAttribute("availableDays", availableDays);
+
+            // Load badges
+            BadgeDAO badgeDAO = new BadgeDAO();
+            List<Badge> badges = badgeDAO.getByUser(user.getId());
+            request.setAttribute("badges", badges);
 
             // 5. Forward to profile.jsp
             request.getRequestDispatcher("/jsp/profile.jsp").forward(request, response);
