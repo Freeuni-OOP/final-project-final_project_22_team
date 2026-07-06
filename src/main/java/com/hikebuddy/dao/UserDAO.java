@@ -1,5 +1,6 @@
 package com.hikebuddy.dao;
-
+import java.util.List;
+import java.util.ArrayList;
 import com.hikebuddy.model.User;
 import com.hikebuddy.util.DBHelper;
 
@@ -57,6 +58,28 @@ public class UserDAO {
         }
     }
 
+    public List<User> searchByUsername(String query, int excludeUserId) throws SQLException {
+        String sql = "SELECT id, username FROM User WHERE username LIKE ? AND id != ? LIMIT 10";
+        List<User> results = new ArrayList<>();
+
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, "%" + query + "%");
+            stmt.setInt(2, excludeUserId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    User u = new User();
+                    u.setId(rs.getInt("id"));
+                    u.setUsername(rs.getString("username"));
+                    results.add(u);
+                }
+            }
+        }
+
+        return results;
+    }
     private User mapRowToUser(ResultSet rs) throws SQLException {
         User user = new User();
         user.setId(rs.getInt("id"));
