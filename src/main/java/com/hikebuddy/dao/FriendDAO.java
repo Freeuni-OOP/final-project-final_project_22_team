@@ -22,7 +22,8 @@ public class FriendDAO {
      * Inserts a new row into FriendRequest with status PENDING.
      */
     public void sendRequest(int senderId, int receiverId) throws SQLException {
-        String sql = "INSERT INTO FriendRequest (sender_id, receiver_id) VALUES (?, ?)";
+        String sql = "INSERT INTO FriendRequest (sender_id, receiver_id) VALUES (?, ?) " +
+                "ON DUPLICATE KEY UPDATE status = 'PENDING', created_at = CURRENT_TIMESTAMP";
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, senderId);
@@ -71,16 +72,21 @@ public class FriendDAO {
         Connection conn = null;
         try {
             conn = DBHelper.getConnection();
-            conn.setAutoCommit(false); // start transaction
+            conn.setAutoCommit(false);
 
-            // 1. Update request status
-            String updateSql = "UPDATE FriendRequest SET status = 'ACCEPTED' WHERE id = ?";
+            String updateSql = "UPDATE FriendRequest SET status = 'ACCEPTED' " +
+                    "WHERE id = ? AND status = 'PENDING'";
+            int rowsUpdated;
             try (PreparedStatement stmt = conn.prepareStatement(updateSql)) {
                 stmt.setInt(1, requestId);
-                stmt.executeUpdate();
+                rowsUpdated = stmt.executeUpdate();
             }
 
-            // 2. Insert into Friendship (store smaller id first to avoid duplicates)
+            if (rowsUpdated == 0) {
+                conn.rollback();
+                return;
+            }
+
             int id1 = Math.min(senderId, receiverId);
             int id2 = Math.max(senderId, receiverId);
             String insertSql = "INSERT INTO Friendship (user_id_1, user_id_2) VALUES (?, ?)";
@@ -90,9 +96,9 @@ public class FriendDAO {
                 stmt.executeUpdate();
             }
 
-            conn.commit(); // commit transaction
+            conn.commit();
         } catch (SQLException e) {
-            if (conn != null) conn.rollback(); // rollback on failure
+            if (conn != null) conn.rollback();
             throw e;
         } finally {
             if (conn != null) conn.close();
