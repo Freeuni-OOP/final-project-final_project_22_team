@@ -10,6 +10,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 
+import com.hikebuddy.dao.GearDAO;
+import com.hikebuddy.model.Gear;
+import java.util.List;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -34,7 +38,12 @@ public class ProfileServlet extends HttpServlet {
             // 3. Set user as request attribute for the JSP
             request.setAttribute("user", user);
 
-            // 4. Forward to profile.jsp
+            // Load gear list
+            GearDAO gearDAO = new GearDAO();
+            List<Gear> gearList = gearDAO.getByUser(user.getId());
+            request.setAttribute("gearList", gearList);
+
+            // 5. Forward to profile.jsp
             request.getRequestDispatcher("/jsp/profile.jsp").forward(request, response);
 
         } catch (SQLException e) {
