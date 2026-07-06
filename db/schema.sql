@@ -50,3 +50,11 @@ CREATE TABLE Photo (
                        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                        FOREIGN KEY (folder_id) REFERENCES StoryFolder(id)
 );
+
+CREATE TABLE Gear (
+                      id INT AUTO_INCREMENT PRIMARY KEY,
+                      user_id INT NOT NULL,
+                      name VARCHAR(100) NOT NULL,
+                      is_checked BOOLEAN DEFAULT FALSE,
+                      FOREIGN KEY (user_id) REFERENCES User(id)
+);
