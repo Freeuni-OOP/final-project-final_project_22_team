@@ -71,3 +71,27 @@ CREATE TABLE Friendship (
                             FOREIGN KEY (user_id_2) REFERENCES User(id),
                             UNIQUE KEY unique_friendship (user_id_1, user_id_2)
 );
+
+CREATE TABLE Gear (
+                      id INT AUTO_INCREMENT PRIMARY KEY,
+                      user_id INT NOT NULL,
+                      name VARCHAR(100) NOT NULL,
+                      is_checked BOOLEAN DEFAULT FALSE,
+                      FOREIGN KEY (user_id) REFERENCES User(id)
+);
+
+CREATE TABLE AvailableDay (
+                              id INT AUTO_INCREMENT PRIMARY KEY,
+                              user_id INT NOT NULL,
+                              available_date DATE NOT NULL,
+                              FOREIGN KEY (user_id) REFERENCES User(id),
+                              UNIQUE KEY unique_user_date (user_id, available_date)
+);
+
+CREATE TABLE Badge (
+                       id INT AUTO_INCREMENT PRIMARY KEY,
+                       user_id INT NOT NULL,
+                       badge_type VARCHAR(50) NOT NULL,
+                       earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                       FOREIGN KEY (user_id) REFERENCES User(id)
+);

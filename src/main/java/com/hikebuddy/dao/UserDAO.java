@@ -91,4 +91,31 @@ public class UserDAO {
         user.setCreatedAt(rs.getTimestamp("created_at"));
         return user;
     }
+
+    public void updateProfile(User u) throws SQLException {
+        String sql = "UPDATE User SET bio=?, hiking_level=? WHERE id=?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, u.getBio());
+            stmt.setString(2, u.getHikingLevel());
+            stmt.setInt(3, u.getId());
+            stmt.executeUpdate();
+        }
+    }
+
+    public User findById(int id) throws SQLException {
+        String sql = "SELECT id, username, password_hash, salt, hiking_level, bio, created_at " +
+                "FROM User WHERE id = ?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRowToUser(rs);
+                } else {
+                    return null;
+                }
+            }
+        }
+    }
 }
