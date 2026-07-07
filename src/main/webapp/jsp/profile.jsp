@@ -17,7 +17,7 @@
 
 <%-- Success message after profile update --%>
 <% if ("updated".equals(request.getParameter("success"))) { %>
-    <div class="success-msg">Profile updated successfully.</div>
+<div class="success-msg">Profile updated successfully.</div>
 <% } %>
 
 <%-- Stats row --%>
@@ -31,7 +31,7 @@
         <div class="stat-label">Gear items</div>
     </div>
     <div class="stat-card">
-        <div class="stat-number">0</div>
+        <div class="stat-number">${friendCount}</div>
         <div class="stat-label">Friends</div>
     </div>
     <div class="level-card">
@@ -47,9 +47,9 @@
 <div class="section-card">
     <h2>About me</h2>
     <% if (user.getBio() != null && !user.getBio().isEmpty()) { %>
-        <p class="bio-text"><%= user.getBio() %></p>
+    <p class="bio-text"><%= user.getBio() %></p>
     <% } else { %>
-        <p class="bio-text" style="color: #aaa;">No bio yet. Edit your profile to add one.</p>
+    <p class="bio-text" style="color: #aaa;">No bio yet. Edit your profile to add one.</p>
     <% } %>
 </div>
 
@@ -80,7 +80,6 @@
 <div class="section-card">
     <h2>My Gear</h2>
 
-    <%-- List of existing gear items --%>
     <%
         java.util.List<com.hikebuddy.model.Gear> gearList =
                 (java.util.List<com.hikebuddy.model.Gear>) request.getAttribute("gearList");
@@ -96,8 +95,8 @@
             <%= gear.isChecked() ? "checked" : "" %>
                onchange="this.form.submit()">
         <span style="<%= gear.isChecked() ? "text-decoration:line-through; color:#aaa;" : "" %>">
-                <%= gear.getName() %>
-            </span>
+            <%= gear.getName() %>
+        </span>
     </form>
     <%
         }
@@ -133,7 +132,7 @@
         int month = now.getMonthValue();
         int daysInMonth = now.lengthOfMonth();
         java.time.DayOfWeek firstDayOfWeek = java.time.LocalDate.of(year, month, 1).getDayOfWeek();
-        int startOffset = firstDayOfWeek.getValue() % 7; // Sunday=0
+        int startOffset = firstDayOfWeek.getValue() % 7;
     %>
 
     <p style="font-weight:500; margin-bottom:12px;">
@@ -208,8 +207,8 @@
             for (com.hikebuddy.model.Badge badge : badges) {
     %>
     <div style="display:inline-block; background:#ecfdf5; border:1px solid #a7f3d0;
-                    border-radius:8px; padding:10px 16px; margin:6px; font-weight:500;
-                    color:#065f46;">
+                border-radius:8px; padding:10px 16px; margin:6px; font-weight:500;
+                color:#065f46;">
         <%= badge.getDisplayName() %>
     </div>
     <%
@@ -221,4 +220,33 @@
         }
     %>
 </div>
+
+<%-- Friends preview section (task 3.10) --%>
+<div class="section-card">
+    <h2>Friends</h2>
+    <%
+        java.util.List<com.hikebuddy.model.User> friendsPreview =
+                (java.util.List<com.hikebuddy.model.User>) request.getAttribute("friendsPreview");
+        if (friendsPreview != null && !friendsPreview.isEmpty()) {
+            for (com.hikebuddy.model.User friend : friendsPreview) {
+    %>
+    <div class="friend-row">
+        <span><%= friend.getUsername() %></span>
+    </div>
+    <%
+        }
+    } else {
+    %>
+    <p style="color:#aaa;">No friends yet.</p>
+    <%
+        }
+    %>
+    <div style="margin-top:16px;">
+        <a href="${pageContext.request.contextPath}/friends"
+           style="color:#2d6a4f; font-weight:500; text-decoration:none;">
+            View all friends →
+        </a>
+    </div>
+</div>
+
 <%@ include file="footer.jsp" %>
