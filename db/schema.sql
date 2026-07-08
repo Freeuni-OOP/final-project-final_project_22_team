@@ -50,3 +50,48 @@ CREATE TABLE Photo (
                        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                        FOREIGN KEY (folder_id) REFERENCES StoryFolder(id)
 );
+
+CREATE TABLE FriendRequest (
+                               id INT AUTO_INCREMENT PRIMARY KEY,
+                               sender_id INT NOT NULL,
+                               receiver_id INT NOT NULL,
+                               status ENUM('PENDING', 'ACCEPTED', 'DECLINED') DEFAULT 'PENDING',
+                               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                               FOREIGN KEY (sender_id) REFERENCES User(id),
+                               FOREIGN KEY (receiver_id) REFERENCES User(id),
+                               UNIQUE KEY unique_request (sender_id, receiver_id)
+);
+
+CREATE TABLE Friendship (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            user_id_1 INT NOT NULL,
+                            user_id_2 INT NOT NULL,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            FOREIGN KEY (user_id_1) REFERENCES User(id),
+                            FOREIGN KEY (user_id_2) REFERENCES User(id),
+                            UNIQUE KEY unique_friendship (user_id_1, user_id_2)
+);
+
+CREATE TABLE Gear (
+                      id INT AUTO_INCREMENT PRIMARY KEY,
+                      user_id INT NOT NULL,
+                      name VARCHAR(100) NOT NULL,
+                      is_checked BOOLEAN DEFAULT FALSE,
+                      FOREIGN KEY (user_id) REFERENCES User(id)
+);
+
+CREATE TABLE AvailableDay (
+                              id INT AUTO_INCREMENT PRIMARY KEY,
+                              user_id INT NOT NULL,
+                              available_date DATE NOT NULL,
+                              FOREIGN KEY (user_id) REFERENCES User(id),
+                              UNIQUE KEY unique_user_date (user_id, available_date)
+);
+
+CREATE TABLE Badge (
+                       id INT AUTO_INCREMENT PRIMARY KEY,
+                       user_id INT NOT NULL,
+                       badge_type VARCHAR(50) NOT NULL,
+                       earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                       FOREIGN KEY (user_id) REFERENCES User(id)
+);

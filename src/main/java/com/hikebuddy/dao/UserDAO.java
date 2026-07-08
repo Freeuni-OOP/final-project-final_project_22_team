@@ -1,5 +1,6 @@
 package com.hikebuddy.dao;
-
+import java.util.List;
+import java.util.ArrayList;
 import com.hikebuddy.model.User;
 import com.hikebuddy.util.DBHelper;
 
@@ -57,6 +58,28 @@ public class UserDAO {
         }
     }
 
+    public List<User> searchByUsername(String query, int excludeUserId) throws SQLException {
+        String sql = "SELECT id, username FROM User WHERE username LIKE ? AND id != ? LIMIT 10";
+        List<User> results = new ArrayList<>();
+
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setString(1, "%" + query + "%");
+            stmt.setInt(2, excludeUserId);
+
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    User u = new User();
+                    u.setId(rs.getInt("id"));
+                    u.setUsername(rs.getString("username"));
+                    results.add(u);
+                }
+            }
+        }
+
+        return results;
+    }
     private User mapRowToUser(ResultSet rs) throws SQLException {
         User user = new User();
         user.setId(rs.getInt("id"));
@@ -67,5 +90,32 @@ public class UserDAO {
         user.setBio(rs.getString("bio"));
         user.setCreatedAt(rs.getTimestamp("created_at"));
         return user;
+    }
+
+    public void updateProfile(User u) throws SQLException {
+        String sql = "UPDATE User SET bio=?, hiking_level=? WHERE id=?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, u.getBio());
+            stmt.setString(2, u.getHikingLevel());
+            stmt.setInt(3, u.getId());
+            stmt.executeUpdate();
+        }
+    }
+
+    public User findById(int id) throws SQLException {
+        String sql = "SELECT id, username, password_hash, salt, hiking_level, bio, created_at " +
+                "FROM User WHERE id = ?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRowToUser(rs);
+                } else {
+                    return null;
+                }
+            }
+        }
     }
 }
