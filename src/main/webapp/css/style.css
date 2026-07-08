@@ -87,6 +87,18 @@ footer {
     border-bottom: none;
 }
 
+.entry-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.entry-row:last-child {
+    border-bottom: none;
+}
+
 /* Profile page */
 .profile-header {
     margin-bottom: 30px;
@@ -225,6 +237,20 @@ footer {
 
 .btn-green:hover {
     background-color: #1b4332;
+}
+
+.btn-red {
+    background-color: #c0392b;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85em;
+}
+
+.btn-red:hover {
+    background-color: #922b21;
 }
 
 .success-msg {
