@@ -1,7 +1,81 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="header.jsp" %>
 
-<%-- NOTE: New journey entry form (task 5.5) goes here — not part of 5.3/5.4, added separately --%>
+<%-- New journey entry form (5.5) --%>
+<div class="section-card">
+    <h2>Log a Hike</h2>
+    <%
+        String formError = (String) request.getAttribute("formError");
+        if (formError != null) {
+    %>
+    <div style="background:#fdecea; color:#611a15; border:1px solid #f5c6c2; padding:12px 16px; border-radius:6px; margin-bottom:16px;">
+        <%= formError %>
+    </div>
+    <%
+        }
+        java.util.List<com.hikebuddy.model.HikeRoute> hikeRoutes =
+                (java.util.List<com.hikebuddy.model.HikeRoute>) request.getAttribute("hikeRoutes");
+    %>
+    <form method="post" action="${pageContext.request.contextPath}/journey">
+        <input type="hidden" name="action" value="add">
+
+        <div class="form-group">
+            <label for="hikeRouteId">Hike route</label>
+            <select id="hikeRouteId" name="hikeRouteId" required>
+                <option value="" disabled selected>Select a route...</option>
+                <%
+                    if (hikeRoutes != null) {
+                        for (com.hikebuddy.model.HikeRoute route : hikeRoutes) {
+                %>
+                <option value="<%= route.getId() %>">
+                    <%= route.getName() %> (<%= route.getDifficulty() %>)
+                </option>
+                <%
+                        }
+                    }
+                %>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="date">Date</label>
+            <input type="date" id="date" name="date" required>
+        </div>
+
+        <div class="form-group">
+            <label for="distance">Distance (km)</label>
+            <input type="number" id="distance" name="distance" step="0.1" min="0" required>
+        </div>
+
+        <div class="form-group">
+            <label for="difficulty">Difficulty</label>
+            <select id="difficulty" name="difficulty" required>
+                <option value="EASY">Easy</option>
+                <option value="MEDIUM">Medium</option>
+                <option value="HARD">Hard</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" placeholder="Optional notes..."></textarea>
+        </div>
+
+        <div class="form-group">
+            <label>Status</label>
+            <div style="display:flex; gap:20px; margin-top:6px;">
+                <label style="font-weight:normal; display:flex; align-items:center; gap:6px;">
+                    <input type="radio" name="status" value="PENDING" checked> Planned
+                </label>
+                <label style="font-weight:normal; display:flex; align-items:center; gap:6px;">
+                    <input type="radio" name="status" value="WISHLIST"> Wishlist
+                </label>
+            </div>
+        </div>
+
+        <button type="submit" class="btn-green">Log hike</button>
+    </form>
+</div>
 
 <%-- Journey Entry section (5.3): Planned & Completed --%>
 <div class="section-card">
