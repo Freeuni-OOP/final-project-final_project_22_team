@@ -60,6 +60,22 @@ public class ProfileServlet extends HttpServlet {
             List<Badge> badges = badgeDAO.getByUser(user.getId());
             request.setAttribute("badges", badges);
 
+            // Load friend count and friends preview
+            com.hikebuddy.dao.FriendDAO friendDAO = new com.hikebuddy.dao.FriendDAO();
+            try {
+                int friendCount = friendDAO.getFriendCount(user.getId());
+                request.setAttribute("friendCount", friendCount);
+
+                List<User> friendsPreview = friendDAO.getFriends(user.getId());
+                if (friendsPreview.size() > 5) {
+                    friendsPreview = friendsPreview.subList(0, 5);
+                }
+                request.setAttribute("friendsPreview", friendsPreview);
+            } catch (SQLException e) {
+                request.setAttribute("friendCount", 0);
+                request.setAttribute("friendsPreview", new java.util.ArrayList<>());
+            }
+
             // 5. Forward to profile.jsp
             request.getRequestDispatcher("/jsp/profile.jsp").forward(request, response);
 
