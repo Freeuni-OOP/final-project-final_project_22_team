@@ -101,26 +101,32 @@ public class JourneyDAO {
     /**
      * Updates the status of a single entry (e.g. PENDING -> COMPLETED,
      * or WISHLIST -> PENDING when moved to planned).
+     * Scoped to userId so a user cannot update another user's entry
+     * by guessing/manipulating entryId.
      */
-    public void updateStatus(int entryId, String status) throws SQLException {
-        String sql = "UPDATE JourneyEntry SET status = ? WHERE id = ?";
+    public boolean updateStatus(int entryId, String status, int userId) throws SQLException {
+        String sql = "UPDATE JourneyEntry SET status = ? WHERE id = ? AND user_id = ?";
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, status);
             stmt.setInt(2, entryId);
-            stmt.executeUpdate();
+            stmt.setInt(3, userId);
+            return stmt.executeUpdate() > 0;
         }
     }
 
     /**
      * Deletes a single journey entry.
+     * Scoped to userId so a user cannot delete another user's entry
+     * by guessing/manipulating entryId.
      */
-    public void deleteEntry(int entryId) throws SQLException {
-        String sql = "DELETE FROM JourneyEntry WHERE id = ?";
+    public boolean deleteEntry(int entryId, int userId) throws SQLException {
+        String sql = "DELETE FROM JourneyEntry WHERE id = ? AND user_id = ?";
         try (Connection conn = DBHelper.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, entryId);
-            stmt.executeUpdate();
+            stmt.setInt(2, userId);
+            return stmt.executeUpdate() > 0;
         }
     }
 
@@ -179,5 +185,23 @@ public class JourneyDAO {
         entry.setStatus(rs.getString("status"));
         entry.setNotes(rs.getString("notes"));
         return entry;
+    }
+
+    public JourneyEntry getById(int entryId, int userId) throws SQLException {
+        String sql = "SELECT je.*, hr.name AS route_name " +
+                "FROM JourneyEntry je " +
+                "LEFT JOIN HikeRoute hr ON je.hike_route_id = hr.id " +
+                "WHERE je.id = ? AND je.user_id = ?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, entryId);
+            stmt.setInt(2, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        }
+        return null;
     }
 }
