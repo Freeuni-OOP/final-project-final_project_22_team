@@ -66,3 +66,52 @@ footer {
     padding: 16px;
     margin-top: 40px;
 }
+
+/* Journey page */
+.section-card {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.entry-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.entry-row:last-child {
+    border-bottom: none;
+}
+
+.btn-green {
+    background-color: #2d6a4f;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85em;
+}
+
+.btn-green:hover {
+    background-color: #1b4332;
+}
+
+.btn-red {
+    background-color: #c0392b;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85em;
+}
+
+.btn-red:hover {
+    background-color: #922b21;
+}
