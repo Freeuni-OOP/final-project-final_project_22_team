@@ -164,6 +164,22 @@ public class JourneyDAO {
     }
 
     /**
+     * For each friend userId in the given list, returns their last `limitPerUser`
+     * completed entries with route name. Used by ExploreServlet (Epic 8) to show
+     * friends' recent hikes. Returns an empty list if userIds is empty.
+     */
+    public List<JourneyEntry> getRecentCompletedForUsers(List<Integer> userIds, int limitPerUser) throws SQLException {
+        List<JourneyEntry> allResults = new ArrayList<>();
+        if (userIds == null || userIds.isEmpty()) {
+            return allResults;
+        }
+        for (int userId : userIds) {
+            allResults.addAll(getRecentCompleted(userId, limitPerUser));
+        }
+        return allResults;
+    }
+
+    /**
      * Maps a ResultSet row (from a query joining JourneyEntry with HikeRoute)
      * to a JourneyEntry object, including the transient routeName field.
      */
