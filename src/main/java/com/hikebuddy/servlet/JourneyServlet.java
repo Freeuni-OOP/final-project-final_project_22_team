@@ -82,14 +82,18 @@ public class JourneyServlet extends HttpServlet {
         try {
             if ("add".equals(action)) {
                 handleAdd(request, response, user);
-                return;
+                return; // handleAdd does its own redirect/forward
             } else if ("status".equals(action)) {
                 int entryId = Integer.parseInt(request.getParameter("entryId"));
                 String newStatus = request.getParameter("newStatus");
-                journeyDAO.updateStatus(entryId, newStatus);
+                if (!"PENDING".equals(newStatus) && !"WISHLIST".equals(newStatus) && !"COMPLETED".equals(newStatus)) {
+                    response.sendRedirect(request.getContextPath() + "/journey");
+                    return;
+                }
+                journeyDAO.updateStatus(entryId, newStatus, user.getId());
             } else if ("delete".equals(action)) {
                 int entryId = Integer.parseInt(request.getParameter("entryId"));
-                journeyDAO.deleteEntry(entryId);
+                journeyDAO.deleteEntry(entryId, user.getId());
             }
         } catch (SQLException | NumberFormatException e) {
             e.printStackTrace();
