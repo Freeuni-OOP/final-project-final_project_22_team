@@ -186,4 +186,22 @@ public class JourneyDAO {
         entry.setNotes(rs.getString("notes"));
         return entry;
     }
+
+    public JourneyEntry getById(int entryId, int userId) throws SQLException {
+        String sql = "SELECT je.*, hr.name AS route_name " +
+                "FROM JourneyEntry je " +
+                "LEFT JOIN HikeRoute hr ON je.hike_route_id = hr.id " +
+                "WHERE je.id = ? AND je.user_id = ?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, entryId);
+            stmt.setInt(2, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRow(rs);
+                }
+            }
+        }
+        return null;
+    }
 }

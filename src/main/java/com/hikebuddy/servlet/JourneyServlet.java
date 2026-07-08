@@ -86,10 +86,23 @@ public class JourneyServlet extends HttpServlet {
             } else if ("status".equals(action)) {
                 int entryId = Integer.parseInt(request.getParameter("entryId"));
                 String newStatus = request.getParameter("newStatus");
-                if (!"PENDING".equals(newStatus) && !"WISHLIST".equals(newStatus) && !"COMPLETED".equals(newStatus)) {
+
+                JourneyEntry entry = journeyDAO.getById(entryId, user.getId());
+                if (entry == null) {
+                    // Not found, or not owned by this user — nothing to do.
                     response.sendRedirect(request.getContextPath() + "/journey");
                     return;
                 }
+
+                boolean validTransition =
+                        ("WISHLIST".equals(entry.getStatus()) && "PENDING".equals(newStatus))
+                                || ("PENDING".equals(entry.getStatus()) && "COMPLETED".equals(newStatus));
+
+                if (!validTransition) {
+                    response.sendRedirect(request.getContextPath() + "/journey");
+                    return;
+                }
+
                 journeyDAO.updateStatus(entryId, newStatus, user.getId());
             } else if ("delete".equals(action)) {
                 int entryId = Integer.parseInt(request.getParameter("entryId"));
@@ -102,6 +115,10 @@ public class JourneyServlet extends HttpServlet {
         response.sendRedirect(request.getContextPath() + "/journey");
     }
 
+    /**
+     * Handles action=add: validates the form, inserts the JourneyEntry (5.6),
+     * then auto-creates a StoryFolder for it (5.7).
+     */
     private void handleAdd(HttpServletRequest request, HttpServletResponse response, User user)
             throws ServletException, IOException, SQLException {
 
@@ -158,11 +175,13 @@ public class JourneyServlet extends HttpServlet {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            // Non-fatal — folder still gets created with the fallback name below.
         }
         String folderName = routeName + " — " + dateParam;
         try {
             storyFolderDAO.createFolder(user.getId(), entryId, folderName);
         } catch (SQLException e) {
+            // Folder creation failure should not roll back the journey entry itself.
             e.printStackTrace();
         }
 
