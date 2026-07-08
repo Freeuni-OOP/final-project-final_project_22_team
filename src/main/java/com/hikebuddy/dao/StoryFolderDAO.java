@@ -82,4 +82,35 @@ public class StoryFolderDAO {
             stmt.executeUpdate();
         }
     }
+
+    /**
+     * Deletes all photos in a folder and then the folder itself,
+     * using a transaction so either both succeed or neither does.
+     */
+    public void deleteFolderWithPhotos(int folderId) throws SQLException {
+        Connection conn = null;
+        try {
+            conn = DBHelper.getConnection();
+            conn.setAutoCommit(false);
+
+            String deletePhotosSql = "DELETE FROM Photo WHERE folder_id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deletePhotosSql)) {
+                stmt.setInt(1, folderId);
+                stmt.executeUpdate();
+            }
+
+            String deleteFolderSql = "DELETE FROM StoryFolder WHERE id = ?";
+            try (PreparedStatement stmt = conn.prepareStatement(deleteFolderSql)) {
+                stmt.setInt(1, folderId);
+                stmt.executeUpdate();
+            }
+
+            conn.commit();
+        } catch (SQLException e) {
+            if (conn != null) conn.rollback();
+            throw e;
+        } finally {
+            if (conn != null) conn.close();
+        }
+    }
 }

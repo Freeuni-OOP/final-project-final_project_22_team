@@ -45,12 +45,13 @@
             </div>
         </a>
         <form method="post" action="${pageContext.request.contextPath}/storyboard"
-              style="padding:0 12px 12px;">
+              style="padding:0 12px 12px;"
+              onsubmit="return confirm('Delete this folder and all its photos?')">
             <input type="hidden" name="action" value="delete">
             <input type="hidden" name="folderId" value="<%= folder.getId() %>">
             <button type="submit" class="btn-red"
                     style="width:100%; background-color:#c0392b; color:white; border:none;
-                               padding:8px; border-radius:6px; cursor:pointer;">
+                   padding:8px; border-radius:6px; cursor:pointer;">
                 Delete folder
             </button>
         </form>

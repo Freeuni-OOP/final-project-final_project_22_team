@@ -83,9 +83,9 @@ public class StoryboardServlet extends HttpServlet {
                             new File(realPath).delete();
                         }
                     }
-                    // Then delete photo rows and the folder itself
-                    photoDAO.deleteAllInFolder(folderId);
-                    storyFolderDAO.deleteFolder(folderId);
+
+                    // Delete photo rows and folder row in a single transaction
+                    storyFolderDAO.deleteFolderWithPhotos(folderId);
                 }
             }
         } catch (SQLException e) {
