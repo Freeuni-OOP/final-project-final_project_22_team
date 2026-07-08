@@ -18,14 +18,18 @@ import java.io.File;
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 @WebServlet("/folder")
-@MultipartConfig(maxFileSize = 10485760, maxRequestSize = 20971520) // 10MB file, 20MB request
+@MultipartConfig(maxFileSize = 10485760, maxRequestSize = 20971520)
 public class FolderServlet extends HttpServlet {
 
     private final StoryFolderDAO storyFolderDAO = new StoryFolderDAO();
     private final PhotoDAO photoDAO = new PhotoDAO();
+
+    private static final Set<String> ALLOWED_EXTENSIONS =
+            Set.of(".jpg", ".jpeg", ".png", ".gif", ".webp");
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -38,10 +42,16 @@ public class FolderServlet extends HttpServlet {
         }
 
         User user = (User) session.getAttribute("user");
-        int folderId = Integer.parseInt(request.getParameter("folderId"));
+
+        int folderId;
+        try {
+            folderId = Integer.parseInt(request.getParameter("folderId"));
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/storyboard");
+            return;
+        }
 
         try {
-            // Verify ownership
             List<StoryFolder> userFolders = storyFolderDAO.getFoldersByUser(user.getId());
             StoryFolder folder = userFolders.stream()
                     .filter(f -> f.getId() == folderId)
@@ -75,7 +85,15 @@ public class FolderServlet extends HttpServlet {
         }
 
         User user = (User) session.getAttribute("user");
-        int folderId = Integer.parseInt(request.getParameter("folderId"));
+
+        int folderId;
+        try {
+            folderId = Integer.parseInt(request.getParameter("folderId"));
+        } catch (NumberFormatException e) {
+            response.sendRedirect(request.getContextPath() + "/storyboard");
+            return;
+        }
+
         String action = request.getParameter("action");
 
         try {
@@ -96,7 +114,13 @@ public class FolderServlet extends HttpServlet {
                     String extension = "";
                     int dotIndex = submittedFileName.lastIndexOf('.');
                     if (dotIndex > 0) {
-                        extension = submittedFileName.substring(dotIndex);
+                        extension = submittedFileName.substring(dotIndex).toLowerCase();
+                    }
+
+                    // Reject upload if extension is not in the whitelist
+                    if (!ALLOWED_EXTENSIONS.contains(extension)) {
+                        response.sendRedirect(request.getContextPath() + "/folder?folderId=" + folderId);
+                        return;
                     }
 
                     String newFileName = UUID.randomUUID() + extension;
@@ -112,13 +136,25 @@ public class FolderServlet extends HttpServlet {
                 }
 
             } else if ("deletePhoto".equals(action)) {
-                int photoId = Integer.parseInt(request.getParameter("photoId"));
-                String filePath = photoDAO.deletePhoto(photoId);
+                int photoId;
+                try {
+                    photoId = Integer.parseInt(request.getParameter("photoId"));
+                } catch (NumberFormatException e) {
+                    response.sendRedirect(request.getContextPath() + "/folder?folderId=" + folderId);
+                    return;
+                }
 
-                if (filePath != null) {
-                    String realPath = getServletContext().getRealPath(filePath);
-                    if (realPath != null) {
-                        new File(realPath).delete();
+                // Verify the photo actually belongs to this folder before deleting
+                List<Photo> folderPhotos = photoDAO.getPhotosByFolder(folderId);
+                boolean ownsPhoto = folderPhotos.stream().anyMatch(p -> p.getId() == photoId);
+
+                if (ownsPhoto) {
+                    String filePath = photoDAO.deletePhoto(photoId);
+                    if (filePath != null) {
+                        String realPath = getServletContext().getRealPath(filePath);
+                        if (realPath != null) {
+                            new File(realPath).delete();
+                        }
                     }
                 }
             }
