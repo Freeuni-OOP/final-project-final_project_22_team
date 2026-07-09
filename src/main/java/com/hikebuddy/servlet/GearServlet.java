@@ -30,11 +30,12 @@ public class GearServlet extends HttpServlet {
 
         try {
             if ("add".equals(action)) {
-                // Read gear name and validate
                 String name = request.getParameter("name");
-                if (name != null && !name.trim().isEmpty()) {
-                    gearDAO.addGear(userId, name.trim());
+                if (name == null || name.trim().isEmpty()) {
+                    response.sendRedirect(request.getContextPath() + "/profile?error=emptygear");
+                    return;
                 }
+                gearDAO.addGear(userId, name.trim());
 
             } else if ("toggle".equals(action)) {
                 // Read gear id and current state

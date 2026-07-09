@@ -16,6 +16,13 @@
 <%-- Create folder form --%>
 <div class="section-card">
     <h2>Create a new folder</h2>
+
+    <% if ("emptyname".equals(request.getParameter("error"))) { %>
+    <div style="background:#fdecea; color:#b91c1c; border:1px solid #f5c6c6;
+                padding:10px 14px; border-radius:6px; margin-bottom:12px;">
+        Folder name cannot be empty.
+    </div>
+    <% } %>
     <form method="post" action="${pageContext.request.contextPath}/storyboard"
           style="display:flex; gap:10px;">
         <input type="hidden" name="action" value="create">
