@@ -21,6 +21,8 @@ public class FriendsServlet extends HttpServlet {
 
     private final FriendDAO friendDAO = new FriendDAO();
     private final UserDAO userDAO = new UserDAO();
+    private final NotificationDAO notificationDAO = new NotificationDAO();
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -72,7 +74,6 @@ public class FriendsServlet extends HttpServlet {
                             && !friendDAO.hasPendingRequest(userId, targetUserId)) {
                         friendDAO.sendRequest(userId, targetUserId);
                         try {
-                            NotificationDAO notificationDAO = new NotificationDAO();
                             notificationDAO.create(
                                     targetUserId,
                                     "FRIEND_REQUEST",
@@ -92,7 +93,6 @@ public class FriendsServlet extends HttpServlet {
                     // userId is the receiver (logged-in user accepted the request)
                     friendDAO.acceptRequest(requestId, senderId, userId);
                     try {
-                        NotificationDAO notificationDAO = new NotificationDAO();
                         notificationDAO.create(
                                 senderId,
                                 "FRIEND_ACCEPTED",
