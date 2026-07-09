@@ -1,5 +1,16 @@
 <%@ include file="header.jsp" %>
 
+<%!
+    private String escapeHtml(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+%>
+
 <h1>My Storyboard</h1>
 
 <%-- Create folder form --%>
@@ -38,7 +49,7 @@
             </div>
             <% } %>
             <div style="padding:12px;">
-                <strong><%= folder.getName() %></strong>
+                <strong><%= escapeHtml(folder.getName()) %></strong>
                 <div style="font-size:0.8em; color:#888; margin-top:4px;">
                     <%= folder.getCreatedAt() != null ? folder.getCreatedAt().toString().substring(0, 10) : "" %>
                 </div>
