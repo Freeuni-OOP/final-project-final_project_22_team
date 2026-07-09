@@ -95,3 +95,13 @@ CREATE TABLE Badge (
                        earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                        FOREIGN KEY (user_id) REFERENCES User(id)
 );
+
+CREATE TABLE Notification (
+                              id INT AUTO_INCREMENT PRIMARY KEY,
+                              user_id INT NOT NULL,
+                              type ENUM('FRIEND_REQUEST', 'FRIEND_ACCEPTED', 'HIKE_SUGGESTION') NOT NULL,
+                              message TEXT,
+                              is_read BOOLEAN DEFAULT FALSE,
+                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                              FOREIGN KEY (user_id) REFERENCES User(id)
+);
