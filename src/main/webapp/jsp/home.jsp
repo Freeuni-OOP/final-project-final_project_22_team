@@ -5,6 +5,17 @@
 <%@ page import="com.hikebuddy.model.StoryFolder" %>
 <%@ include file="header.jsp" %>
 
+<%!
+    private String escapeHtml(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+%>
+
 <%
     User user = (User) request.getAttribute("user");
     List<HikeRoute> suggestedHikes = (List<HikeRoute>) request.getAttribute("suggestedHikes");
