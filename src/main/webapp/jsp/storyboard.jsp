@@ -1,10 +1,28 @@
 <%@ include file="header.jsp" %>
 
+<%!
+    private String escapeHtml(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+%>
+
 <h1>My Storyboard</h1>
 
 <%-- Create folder form --%>
 <div class="section-card">
     <h2>Create a new folder</h2>
+
+    <% if ("emptyname".equals(request.getParameter("error"))) { %>
+    <div style="background:#fdecea; color:#b91c1c; border:1px solid #f5c6c6;
+                padding:10px 14px; border-radius:6px; margin-bottom:12px;">
+        Folder name cannot be empty.
+    </div>
+    <% } %>
     <form method="post" action="${pageContext.request.contextPath}/storyboard"
           style="display:flex; gap:10px;">
         <input type="hidden" name="action" value="create">
@@ -38,7 +56,7 @@
             </div>
             <% } %>
             <div style="padding:12px;">
-                <strong><%= folder.getName() %></strong>
+                <strong><%= escapeHtml(folder.getName()) %></strong>
                 <div style="font-size:0.8em; color:#888; margin-top:4px;">
                     <%= folder.getCreatedAt() != null ? folder.getCreatedAt().toString().substring(0, 10) : "" %>
                 </div>

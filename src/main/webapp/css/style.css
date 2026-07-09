@@ -261,3 +261,131 @@ footer {
     border-radius: 6px;
     margin-bottom: 16px;
 }
+
+.home-section {
+    background: white;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+    background: #e0e0e0;
+    border-radius: 4px;
+    height: 8px;
+    width: 100%;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: #2d6a4f;
+    height: 100%;
+}
+
+.hike-card {
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.journey-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.folder-card {
+    display: inline-block;
+    width: 120px;
+    margin-right: 10px;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.folder-card img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.folder-placeholder {
+    width: 120px;
+    height: 120px;
+    background: #e0e0e0;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: #888;
+}
+
+.nav-links a.active {
+    border-bottom: 2px solid white;
+    font-weight: bold;
+}
+
+/* ===================================
+   Responsive layout (mobile-friendly)
+   Breakpoint: 768px
+   =================================== */
+@media (max-width: 768px) {
+
+    /* Nav bar — stack vertically instead of horizontal row */
+    nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    nav .nav-links {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    /* Profile stats — single column instead of side-by-side cards */
+    .stats-row {
+        flex-direction: column;
+    }
+
+    .stat-card,
+    .level-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* Rows that were side-by-side (name + buttons) — stack instead */
+    .friend-row,
+    .entry-row,
+    .journey-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    /* Storyboard folder previews — full width instead of horizontal scroll */
+    .folder-card {
+        display: block;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 12px;
+    }
+
+    /* Tighter padding on small screens */
+    .container {
+        padding: 0 14px;
+    }
+
+    .section-card,
+    .home-section,
+    .friends-section {
+        padding: 16px;
+    }
+}
