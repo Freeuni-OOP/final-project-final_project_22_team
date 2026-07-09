@@ -1,6 +1,7 @@
 package com.hikebuddy.servlet;
 
 import com.hikebuddy.dao.FriendDAO;
+import com.hikebuddy.dao.NotificationDAO;
 import com.hikebuddy.dao.UserDAO;
 import com.hikebuddy.model.FriendRequest;
 import com.hikebuddy.model.User;
@@ -20,6 +21,8 @@ public class FriendsServlet extends HttpServlet {
 
     private final FriendDAO friendDAO = new FriendDAO();
     private final UserDAO userDAO = new UserDAO();
+    private final NotificationDAO notificationDAO = new NotificationDAO();
+
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -50,6 +53,14 @@ public class FriendsServlet extends HttpServlet {
             throw new ServletException("Database error loading friends page", e);
         }
 
+        // Notification count for nav badge
+        try {
+            int unreadCount = new com.hikebuddy.dao.NotificationDAO().getUnreadCount(loggedInUser.getId());
+            request.setAttribute("unreadCount", unreadCount);
+        } catch (SQLException e) {
+            request.setAttribute("unreadCount", 0);
+        }
+
         request.getRequestDispatcher("/jsp/friends.jsp").forward(request, response);
     }
 
@@ -70,19 +81,36 @@ public class FriendsServlet extends HttpServlet {
                     if (!friendDAO.areFriends(userId, targetUserId)
                             && !friendDAO.hasPendingRequest(userId, targetUserId)) {
                         friendDAO.sendRequest(userId, targetUserId);
+                        try {
+                            notificationDAO.create(
+                                    targetUserId,
+                                    "FRIEND_REQUEST",
+                                    loggedInUser.getUsername() + " sent you a friend request"
+                            );
+                        } catch (SQLException e) {
+                            // notification failure must NOT break the friend request
+                            e.printStackTrace();
+                        }
                     }
-                    // TODO Epic 8: NotificationDAO.create(targetUserId, "FRIEND_REQUEST",
-                    //              loggedInUser.getUsername() + " sent you a friend request");
                     break;
                 }
 
                 case "accept": {
                     int requestId = Integer.parseInt(request.getParameter("requestId"));
-                    int senderId  = Integer.parseInt(request.getParameter("senderId"));
+                    int senderId = Integer.parseInt(request.getParameter("senderId"));
                     // userId is the receiver (logged-in user accepted the request)
                     friendDAO.acceptRequest(requestId, senderId, userId);
-                    // TODO Epic 8: NotificationDAO.create(senderId, "FRIEND_ACCEPTED",
-                    //              loggedInUser.getUsername() + " accepted your friend request");
+                    try {
+                        notificationDAO.create(
+                                senderId,
+                                "FRIEND_ACCEPTED",
+                                loggedInUser.getUsername() + " accepted your friend request"
+                        );
+                    } catch (SQLException e) {
+                        // notification failure must NOT break the accept action
+                        e.printStackTrace();
+                    }
+
                     break;
                 }
 
