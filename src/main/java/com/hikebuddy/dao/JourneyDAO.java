@@ -220,4 +220,21 @@ public class JourneyDAO {
         }
         return null;
     }
+
+    /**
+     * Checks if a user already has any journey entry for a given hike route.
+     * Used by ExploreServlet to prevent duplicate entries when planning/wishlisting.
+     */
+    public boolean existsForUser(int userId, int hikeRouteId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM JourneyEntry WHERE user_id = ? AND hike_route_id = ?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, hikeRouteId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1) > 0;
+            }
+        }
+        return false;
+    }
 }
