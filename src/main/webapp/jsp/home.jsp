@@ -106,7 +106,7 @@
         <%
             if (folder.getThumbnailPath() != null) {
         %>
-        <img src="<%= folder.getThumbnailPath() %>" alt="<%= folder.getName() %>">
+        <img src="<%= folder.getThumbnailPath() %>" alt="<%= escapeHtml(folder.getName()) %>">
         <%
         } else {
         %>
@@ -114,7 +114,7 @@
         <%
             }
         %>
-        <p><%= folder.getName() %></p>
+        <p><%= escapeHtml(folder.getName()) %></p>
     </a>
     <%
             }
