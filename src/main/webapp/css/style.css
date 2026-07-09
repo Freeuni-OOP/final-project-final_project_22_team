@@ -325,3 +325,8 @@ footer {
     font-size: 0.8rem;
     color: #888;
 }
+
+.nav-links a.active {
+    border-bottom: 2px solid white;
+    font-weight: bold;
+}

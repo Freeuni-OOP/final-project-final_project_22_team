@@ -80,6 +80,13 @@
 <div class="section-card">
     <h2>My Gear</h2>
 
+    <% if ("emptygear".equals(request.getParameter("error"))) { %>
+    <div style="background:#fdecea; color:#b91c1c; border:1px solid #f5c6c6;
+                padding:10px 14px; border-radius:6px; margin-bottom:12px;">
+        Gear name cannot be empty.
+    </div>
+    <% } %>
+
     <%
         java.util.List<com.hikebuddy.model.Gear> gearList =
                 (java.util.List<com.hikebuddy.model.Gear>) request.getAttribute("gearList");
@@ -111,7 +118,7 @@
     <form method="post" action="${pageContext.request.contextPath}/gear"
           style="display:flex; gap:10px; margin-top:16px;">
         <input type="hidden" name="action" value="add">
-        <input type="text" name="name" placeholder="Add gear item..."
+        <input type="text" name="name" placeholder="Add gear item..." required
                class="form-group" style="flex:1; margin:0;">
         <button type="submit" class="btn-green">Add</button>
     </form>

@@ -9,13 +9,16 @@
 
 <nav>
     <div class="logo">HikeBuddy</div>
+    <%
+        String uri = request.getRequestURI();
+    %>
     <div class="nav-links">
-        <a href="${pageContext.request.contextPath}/home">Home</a>
-        <a href="${pageContext.request.contextPath}/explore">Explore</a>
-        <a href="${pageContext.request.contextPath}/journey">My Journey</a>
-        <a href="${pageContext.request.contextPath}/storyboard">Storyboard</a>
-        <a href="${pageContext.request.contextPath}/friends">Friends</a>
-        <a href="${pageContext.request.contextPath}/profile">Profile</a>
+        <a href="${pageContext.request.contextPath}/home" class="<%= uri.contains("/home") ? "active" : "" %>">Home</a>
+        <a href="${pageContext.request.contextPath}/explore" class="<%= uri.contains("/explore") ? "active" : "" %>">Explore</a>
+        <a href="${pageContext.request.contextPath}/journey" class="<%= uri.contains("/journey") ? "active" : "" %>">My Journey</a>
+        <a href="${pageContext.request.contextPath}/storyboard" class="<%= uri.contains("/storyboard") ? "active" : "" %>">Storyboard</a>
+        <a href="${pageContext.request.contextPath}/friends" class="<%= uri.contains("/friends") ? "active" : "" %>">Friends</a>
+        <a href="${pageContext.request.contextPath}/profile" class="<%= uri.contains("/profile") ? "active" : "" %>">Profile</a>
         <a href="${pageContext.request.contextPath}/logout">Logout</a>
     </div>
 </nav>

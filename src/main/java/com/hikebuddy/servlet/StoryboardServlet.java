@@ -62,10 +62,11 @@ public class StoryboardServlet extends HttpServlet {
         try {
             if ("create".equals(action)) {
                 String folderName = request.getParameter("folderName");
-                if (folderName != null && !folderName.trim().isEmpty()) {
-                    // journeyEntryId is null since this is a manually created folder
-                    storyFolderDAO.createFolder(user.getId(), null, folderName.trim());
+                if (folderName == null || folderName.trim().isEmpty()) {
+                    response.sendRedirect(request.getContextPath() + "/storyboard?error=emptyname");
+                    return;
                 }
+                storyFolderDAO.createFolder(user.getId(), null, folderName.trim());
 
             } else if ("delete".equals(action)) {
                 int folderId = Integer.parseInt(request.getParameter("folderId"));
