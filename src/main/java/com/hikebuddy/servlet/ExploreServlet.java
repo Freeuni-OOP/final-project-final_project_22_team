@@ -7,6 +7,7 @@ import com.hikebuddy.dao.NotificationDAO;
 import com.hikebuddy.dao.StoryFolderDAO;
 import com.hikebuddy.model.HikeRoute;
 import com.hikebuddy.model.JourneyEntry;
+import com.hikebuddy.model.StoryFolder;
 import com.hikebuddy.model.User;
 
 import jakarta.servlet.ServletException;
@@ -103,6 +104,15 @@ public class ExploreServlet extends HttpServlet {
             request.setAttribute("unreadCount", unreadCount);
         } catch (SQLException e) {
             request.setAttribute("unreadCount", 0);
+        }
+
+        // Recent storyboard folders
+        try {
+            List<StoryFolder> allFolders = storyFolderDAO.getFoldersByUser(userId);
+            List<StoryFolder> recentFolders = allFolders.size() > 2 ? allFolders.subList(0, 2) : allFolders;
+            request.setAttribute("recentFolders", recentFolders);
+        } catch (SQLException e) {
+            request.setAttribute("recentFolders", new ArrayList<>());
         }
 
         request.getRequestDispatcher("/jsp/explore.jsp").forward(request, response);

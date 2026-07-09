@@ -58,8 +58,8 @@ public class LoginServlet extends HttpServlet {
             HttpSession session = request.getSession(true);
             session.setAttribute("user", user);
 
-            // 6. Redirect to home page
-            response.sendRedirect(request.getContextPath() + "/home");
+            // 6. Redirect to explore page
+            response.sendRedirect(request.getContextPath() + "/explore");
 
         } catch (SQLException e) {
             e.printStackTrace();
