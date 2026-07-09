@@ -330,3 +330,62 @@ footer {
     border-bottom: 2px solid white;
     font-weight: bold;
 }
+
+/* ===================================
+   Responsive layout (mobile-friendly)
+   Breakpoint: 768px
+   =================================== */
+@media (max-width: 768px) {
+
+    /* Nav bar — stack vertically instead of horizontal row */
+    nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    nav .nav-links {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    /* Profile stats — single column instead of side-by-side cards */
+    .stats-row {
+        flex-direction: column;
+    }
+
+    .stat-card,
+    .level-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* Rows that were side-by-side (name + buttons) — stack instead */
+    .friend-row,
+    .entry-row,
+    .journey-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    /* Storyboard folder previews — full width instead of horizontal scroll */
+    .folder-card {
+        display: block;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 12px;
+    }
+
+    /* Tighter padding on small screens */
+    .container {
+        padding: 0 14px;
+    }
+
+    .section-card,
+    .home-section,
+    .friends-section {
+        padding: 16px;
+    }
+}
