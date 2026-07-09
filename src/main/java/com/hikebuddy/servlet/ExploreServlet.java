@@ -14,6 +14,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -34,13 +35,18 @@ public class ExploreServlet extends HttpServlet {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        User loggedInUser = (User) request.getSession().getAttribute("user");
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        User loggedInUser = (User) session.getAttribute("user");
         int userId = loggedInUser.getId();
         String hikingLevel = loggedInUser.getHikingLevel();
 
         // Search and filter
         String query = request.getParameter("q");
-        String diff  = request.getParameter("diff");
+        String diff = request.getParameter("diff");
 
         if ((query != null && !query.trim().isEmpty())
                 || (diff != null && !diff.trim().isEmpty() && !"ALL".equals(diff))) {
@@ -106,12 +112,37 @@ public class ExploreServlet extends HttpServlet {
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        User loggedInUser = (User) request.getSession().getAttribute("user");
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("user") == null) {
+            response.sendRedirect(request.getContextPath() + "/login");
+            return;
+        }
+        User loggedInUser = (User) session.getAttribute("user");
         int userId = loggedInUser.getId();
         String action = request.getParameter("action");
 
         try {
-            int hikeRouteId = Integer.parseInt(request.getParameter("hikeRouteId"));
+            // FIX 2 — validate hikeRouteId exists and is a valid number
+            String hikeRouteIdParam = request.getParameter("hikeRouteId");
+            if (hikeRouteIdParam == null || hikeRouteIdParam.trim().isEmpty()) {
+                response.sendRedirect(request.getContextPath() + "/explore");
+                return;
+            }
+
+            int hikeRouteId;
+            try {
+                hikeRouteId = Integer.parseInt(hikeRouteIdParam);
+            } catch (NumberFormatException e) {
+                response.sendRedirect(request.getContextPath() + "/explore");
+                return;
+            }
+
+            // FIX 2 — verify route actually exists in DB
+            HikeRoute route = hikeRouteDAO.getById(hikeRouteId);
+            if (route == null) {
+                response.sendRedirect(request.getContextPath() + "/explore");
+                return;
+            }
 
             if (!journeyDAO.existsForUser(userId, hikeRouteId)) {
 
@@ -119,7 +150,7 @@ public class ExploreServlet extends HttpServlet {
                 entry.setUserId(userId);
                 entry.setHikeRouteId(hikeRouteId);
                 entry.setDate(java.sql.Date.valueOf(LocalDate.now()));
-                entry.setDifficulty(request.getParameter("difficulty"));
+                entry.setDifficulty(route.getDifficulty()); // use DB value, not form value
                 entry.setDistance(0);
                 entry.setNotes("");
 
@@ -131,9 +162,7 @@ public class ExploreServlet extends HttpServlet {
                     entry.setStatus("PENDING");
                     int entryId = journeyDAO.addEntry(entry);
 
-                    String routeName = request.getParameter("routeName");
-                    if (routeName == null) routeName = "Hike";
-                    String folderName = routeName + " — " + LocalDate.now();
+                    String folderName = route.getName() + " — " + LocalDate.now();
                     try {
                         storyFolderDAO.createFolder(userId, entryId, folderName);
                     } catch (SQLException e) {
@@ -142,7 +171,7 @@ public class ExploreServlet extends HttpServlet {
                 }
             }
 
-        } catch (SQLException | NumberFormatException e) {
+        } catch (SQLException e) {
             e.printStackTrace();
         }
 
