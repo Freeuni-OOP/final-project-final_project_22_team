@@ -53,6 +53,14 @@ public class FriendsServlet extends HttpServlet {
             throw new ServletException("Database error loading friends page", e);
         }
 
+        // Notification count for nav badge
+        try {
+            int unreadCount = new com.hikebuddy.dao.NotificationDAO().getUnreadCount(loggedInUser.getId());
+            request.setAttribute("unreadCount", unreadCount);
+        } catch (SQLException e) {
+            request.setAttribute("unreadCount", 0);
+        }
+
         request.getRequestDispatcher("/jsp/friends.jsp").forward(request, response);
     }
 
