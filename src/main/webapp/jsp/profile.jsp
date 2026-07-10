@@ -95,18 +95,28 @@
         if (gearList != null && !gearList.isEmpty()) {
             for (com.hikebuddy.model.Gear gear : gearList) {
     %>
-    <form method="post" action="${pageContext.request.contextPath}/gear"
-          style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
-        <input type="hidden" name="action" value="toggle">
-        <input type="hidden" name="gearId" value="<%= gear.getId() %>">
-        <input type="hidden" name="currentState" value="<%= gear.isChecked() %>">
-        <input type="checkbox"
-            <%= gear.isChecked() ? "checked" : "" %>
-               onchange="this.form.submit()">
-        <span style="<%= gear.isChecked() ? "text-decoration:line-through; color:#aaa;" : "" %>">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+        <form method="post" action="${pageContext.request.contextPath}/gear"
+              style="display:flex; align-items:center; gap:10px; margin:0;">
+            <input type="hidden" name="action" value="toggle">
+            <input type="hidden" name="gearId" value="<%= gear.getId() %>">
+            <input type="hidden" name="currentState" value="<%= gear.isChecked() %>">
+            <input type="checkbox"
+                <%= gear.isChecked() ? "checked" : "" %>
+                   onchange="this.form.submit()">
+            <span style="<%= gear.isChecked() ? "text-decoration:line-through; color:#aaa;" : "" %>">
             <%= gear.getName() %>
         </span>
-    </form>
+        </form>
+        <form method="post" action="${pageContext.request.contextPath}/gear" style="margin:0;">
+            <input type="hidden" name="action" value="delete">
+            <input type="hidden" name="gearId" value="<%= gear.getId() %>">
+            <button type="submit" style="background:none; border:none; color:#c0392b;
+                                      cursor:pointer; font-size:16px;" aria-label="Delete gear">
+                &times;
+            </button>
+        </form>
+    </div>
     <%
         }
     } else {
