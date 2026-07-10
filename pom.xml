@@ -31,7 +31,7 @@
             <version>8.3.0</version>
         </dependency>
 
-        <!-- JUnit 5 for unit/integration tests (src/test/java) -->
+        <!-- JUnit 5 only — no JUnit 4, no TestNG -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>
