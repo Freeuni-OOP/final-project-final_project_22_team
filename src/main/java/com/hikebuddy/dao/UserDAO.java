@@ -118,4 +118,17 @@ public class UserDAO {
             }
         }
     }
+
+    /**
+     * Updates the timestamp of when this user last viewed their friend requests.
+     * Used to determine which pending requests are "new" for the notification badge.
+     */
+    public void updateLastSeenRequests(int userId) throws SQLException {
+        String sql = "UPDATE User SET last_seen_requests_at = NOW() WHERE id = ?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.executeUpdate();
+        }
+    }
 }

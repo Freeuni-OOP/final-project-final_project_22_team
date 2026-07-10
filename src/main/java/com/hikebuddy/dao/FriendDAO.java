@@ -74,7 +74,7 @@ public class FriendDAO {
             conn = DBHelper.getConnection();
             conn.setAutoCommit(false);
 
-            String updateSql = "UPDATE FriendRequest SET status = 'ACCEPTED' " +
+            String updateSql = "UPDATE FriendRequest SET status = 'ACCEPTED', accepted_at = NOW() " +
                     "WHERE id = ? AND status = 'PENDING'";
             int rowsUpdated;
             try (PreparedStatement stmt = conn.prepareStatement(updateSql)) {
@@ -227,5 +227,70 @@ public class FriendDAO {
             }
         }
         return false;
+    }
+
+    /**
+     * Returns the count of items the user hasn't seen since their last visit
+     * to the Friends page: pending incoming requests + requests they sent
+     * that were recently accepted.
+     */
+    public int getUnseenPendingCount(int userId) throws SQLException {
+        String sql =
+                "SELECT " +
+                        "(SELECT COUNT(*) FROM FriendRequest fr JOIN User u ON u.id = ? " +
+                        " WHERE fr.receiver_id = ? AND fr.status = 'PENDING' " +
+                        " AND (u.last_seen_requests_at IS NULL OR fr.created_at > u.last_seen_requests_at)) " +
+                        "+ " +
+                        "(SELECT COUNT(*) FROM FriendRequest fr JOIN User u ON u.id = ? " +
+                        " WHERE fr.sender_id = ? AND fr.status = 'ACCEPTED' " +
+                        " AND (u.last_seen_requests_at IS NULL OR fr.accepted_at > u.last_seen_requests_at)) " +
+                        "AS total";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, userId);
+            stmt.setInt(3, userId);
+            stmt.setInt(4, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    /**
+     * Returns friend requests this user sent that were recently accepted
+     * (since their last visit to the Friends page). Used to show
+     * "X accepted your friend request" messages.
+     */
+    public List<FriendRequest> getRecentlyAcceptedBySender(int userId) throws SQLException {
+        String sql = "SELECT fr.id, fr.sender_id, fr.receiver_id, fr.status, fr.created_at, fr.accepted_at, " +
+                "u2.username AS receiver_username " +
+                "FROM FriendRequest fr " +
+                "JOIN User u ON u.id = ? " +
+                "JOIN User u2 ON fr.receiver_id = u2.id " +
+                "WHERE fr.sender_id = ? AND fr.status = 'ACCEPTED' " +
+                "AND (u.last_seen_requests_at IS NULL OR fr.accepted_at > u.last_seen_requests_at) " +
+                "ORDER BY fr.accepted_at DESC";
+        List<FriendRequest> requests = new ArrayList<>();
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setInt(2, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                while (rs.next()) {
+                    FriendRequest fr = new FriendRequest();
+                    fr.setId(rs.getInt("id"));
+                    fr.setSenderId(rs.getInt("sender_id"));
+                    fr.setReceiverId(rs.getInt("receiver_id"));
+                    fr.setStatus(rs.getString("status"));
+                    fr.setCreatedAt(rs.getTimestamp("created_at"));
+                    fr.setAcceptedAt(rs.getTimestamp("accepted_at"));
+                    fr.setReceiverUsername(rs.getString("receiver_username"));
+                    requests.add(fr);
+                }
+            }
+        }
+        return requests;
     }
 }

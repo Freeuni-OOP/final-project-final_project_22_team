@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import com.hikebuddy.util.FriendRequestBadgeHelper;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -35,6 +36,9 @@ public class HikeDetailServlet extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/login");
             return;
         }
+
+        User loggedInUser = (User) session.getAttribute("user");
+        FriendRequestBadgeHelper.loadUnseenCount(request, loggedInUser.getId());
 
         // Read and validate id param
         String idParam = request.getParameter("id");

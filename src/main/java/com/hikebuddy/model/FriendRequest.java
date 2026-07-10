@@ -11,9 +11,11 @@ public class FriendRequest {
     private int id;
     private int senderId;
     private int receiverId;
-    private String senderUsername; // transient — populated via JOIN, not a DB column
+    private String senderUsername;   // transient — populated via JOIN, not a DB column
+    private String receiverUsername; // transient — populated via JOIN, not a DB column
     private String status;         // PENDING, ACCEPTED, DECLINED
     private Timestamp createdAt;
+    private Timestamp acceptedAt;
 
     public FriendRequest() {
     }
@@ -30,9 +32,15 @@ public class FriendRequest {
     public String getSenderUsername() { return senderUsername; }
     public void setSenderUsername(String senderUsername) { this.senderUsername = senderUsername; }
 
+    public String getReceiverUsername() { return receiverUsername; }
+    public void setReceiverUsername(String receiverUsername) { this.receiverUsername = receiverUsername; }
+
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 
     public Timestamp getCreatedAt() { return createdAt; }
     public void setCreatedAt(Timestamp createdAt) { this.createdAt = createdAt; }
+
+    public Timestamp getAcceptedAt() { return acceptedAt; }
+    public void setAcceptedAt(Timestamp acceptedAt) { this.acceptedAt = acceptedAt; }
 }
