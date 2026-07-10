@@ -27,7 +27,7 @@
         <input type="hidden" name="action" value="search">
         <input type="text" name="q" placeholder="Search by username" required
                value="${param.q != null ? param.q : ''}">
-        <button type="submit">Search</button>
+        <button type="submit" class="btn-green">Search</button>
     </form>
 
     <%
@@ -45,7 +45,7 @@
         <form method="post" action="${pageContext.request.contextPath}/friends" style="display:inline;">
             <input type="hidden" name="action" value="send">
             <input type="hidden" name="targetUserId" value="<%= u.getId() %>">
-            <button type="submit">Send request</button>
+            <button type="submit" class="btn-green">Send request</button>
         </form>
     </div>
     <%
@@ -73,12 +73,12 @@
             <input type="hidden" name="action" value="accept">
             <input type="hidden" name="requestId" value="<%= r.getId() %>">
             <input type="hidden" name="senderId" value="<%= r.getSenderId() %>">
-            <button type="submit">Accept</button>
+            <button type="submit" class="btn-green">Accept</button>
         </form>
         <form method="post" action="${pageContext.request.contextPath}/friends" style="display:inline;">
             <input type="hidden" name="action" value="decline">
             <input type="hidden" name="requestId" value="<%= r.getId() %>">
-            <button type="submit">Decline</button>
+            <button type="submit" class="btn-red">Decline</button>
         </form>
     </div>
     <%
@@ -104,7 +104,7 @@
         <form method="post" action="${pageContext.request.contextPath}/friends" style="display:inline;">
             <input type="hidden" name="action" value="remove">
             <input type="hidden" name="friendId" value="<%= f.getId() %>">
-            <button type="submit">Remove</button>
+            <button type="submit" class="btn-red">Remove</button>
         </form>
     </div>
     <%

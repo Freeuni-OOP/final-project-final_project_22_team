@@ -4,6 +4,7 @@ import com.hikebuddy.dao.BadgeDAO;
 import com.hikebuddy.dao.HikeRouteDAO;
 import com.hikebuddy.dao.JourneyDAO;
 import com.hikebuddy.dao.StoryFolderDAO;
+import com.hikebuddy.dao.UserDAO;
 import com.hikebuddy.model.Badge;
 import com.hikebuddy.model.HikeRoute;
 import com.hikebuddy.model.JourneyEntry;
@@ -29,6 +30,12 @@ public class JourneyServlet extends HttpServlet {
     private final HikeRouteDAO hikeRouteDAO = new HikeRouteDAO();
     private final StoryFolderDAO storyFolderDAO = new StoryFolderDAO();
     private final BadgeDAO badgeDAO = new BadgeDAO();
+    private final UserDAO userDAO = new UserDAO();
+
+    // Hiking level auto-promotion is evaluated in non-overlapping batches
+    // of this many completed hikes (hikes 1-5, then 6-10, etc.)
+    private static final int HIKES_PER_BATCH = 5;
+    private static final String[] LEVELS = {"BEGINNER", "INTERMEDIATE", "ADVANCED"};
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -118,6 +125,7 @@ public class JourneyServlet extends HttpServlet {
                     if (completedCount >= 10) {
                         badgeDAO.awardIfNotExists(user.getId(), Badge.TEN_HIKES);
                     }
+                    checkForLevelUp(user, session);
                 }
             } else if ("delete".equals(action)) {
                 int entryId = Integer.parseInt(request.getParameter("entryId"));
@@ -216,5 +224,51 @@ public class JourneyServlet extends HttpServlet {
             e.printStackTrace();
         }
         request.getRequestDispatcher("/jsp/journey.jsp").forward(request, response);
+    }
+
+    /**
+     * Auto-promotes the user's hiking level based on the difficulty mix of
+     * completed hikes, evaluated in non-overlapping batches of
+     * HIKES_PER_BATCH (hikes 1-5, then 6-10, etc.) — only fires exactly when
+     * a batch is completed, not on every single hike. Within a batch:
+     *   - all HARD                      -> straight to ADVANCED
+     *   - any HARD (but not all)        -> up 2 levels
+     *   - no HARD (EASY/MEDIUM mix)     -> up 1 level
+     * Capped at ADVANCED, never downgrades.
+     */
+    private void checkForLevelUp(User user, HttpSession session) throws SQLException {
+        List<String> difficulties = journeyDAO.getCompletedDifficultiesOrdered(user.getId());
+        int totalCompleted = difficulties.size();
+
+        if (totalCompleted == 0 || totalCompleted % HIKES_PER_BATCH != 0) {
+            return; // not at a batch boundary yet
+        }
+
+        List<String> batch = difficulties.subList(totalCompleted - HIKES_PER_BATCH, totalCompleted);
+        long hardCount = batch.stream().filter("HARD"::equals).count();
+
+        int currentIndex = levelIndex(user.getHikingLevel());
+        int newIndex;
+        if (hardCount == HIKES_PER_BATCH) {
+            newIndex = LEVELS.length - 1; // all HARD -> straight to ADVANCED
+        } else if (hardCount >= 1) {
+            newIndex = Math.min(currentIndex + 2, LEVELS.length - 1);
+        } else {
+            newIndex = Math.min(currentIndex + 1, LEVELS.length - 1);
+        }
+
+        if (newIndex > currentIndex) {
+            String newLevel = LEVELS[newIndex];
+            user.setHikingLevel(newLevel);
+            userDAO.updateProfile(user);
+            session.setAttribute("user", user);
+        }
+    }
+
+    private int levelIndex(String level) {
+        for (int i = 0; i < LEVELS.length; i++) {
+            if (LEVELS[i].equals(level)) return i;
+        }
+        return 0;
     }
 }

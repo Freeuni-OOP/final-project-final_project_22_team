@@ -83,6 +83,17 @@ nav .nav-links a:hover {
     color: var(--color-rust-dark);
 }
 
+nav .logout-link {
+    display: flex;
+    align-items: center;
+    border-bottom: none;
+}
+
+nav .logout-link svg {
+    width: 20px;
+    height: 20px;
+}
+
 /* Main content area */
 .container {
     max-width: 1100px;
