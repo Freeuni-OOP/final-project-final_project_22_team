@@ -10,7 +10,14 @@
 <body>
 
 <nav>
-    <div class="logo">HikeBuddy</div>
+    <div class="logo">
+        <svg class="logo-icon" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <circle cx="16" cy="16" r="14" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="16" cy="16" r="8" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="16" cy="16" r="2.5" fill="currentColor"/>
+        </svg>
+        HikeBuddy
+    </div>
     <%
         String uri = request.getRequestURI();
     %>
