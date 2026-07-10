@@ -62,4 +62,18 @@ public class GearDAO {
             stmt.executeUpdate();
         }
     }
+
+    /**
+     * Deletes a gear item, but only if it belongs to the given user.
+     * Returns true if a row was actually deleted (i.e. the user owned it).
+     */
+    public boolean deleteGear(int gearId, int userId) throws SQLException {
+        String sql = "DELETE FROM Gear WHERE id = ? AND user_id = ?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, gearId);
+            stmt.setInt(2, userId);
+            return stmt.executeUpdate() > 0;
+        }
+    }
 }

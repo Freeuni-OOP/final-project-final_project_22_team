@@ -42,6 +42,10 @@ public class GearServlet extends HttpServlet {
                 int gearId = Integer.parseInt(request.getParameter("gearId"));
                 boolean currentState = Boolean.parseBoolean(request.getParameter("currentState"));
                 gearDAO.toggleCheck(gearId, currentState);
+
+            } else if ("delete".equals(action)) {
+                int gearId = Integer.parseInt(request.getParameter("gearId"));
+                gearDAO.deleteGear(gearId, userId);
             }
 
         } catch (SQLException e) {
