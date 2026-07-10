@@ -1,12 +1,12 @@
 package com.hikebuddy.model;
 
-import org.junit.Test;
-import static org.junit.Assert.*;
+import org.junit.jupiter.api.Test;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HikeRouteTest {
 
     @Test
-    public void testEmptyConstructor() {
+    void testEmptyConstructor() {
         HikeRoute route = new HikeRoute();
         assertEquals(0, route.getId());
         assertNull(route.getName());
@@ -17,7 +17,7 @@ public class HikeRouteTest {
     }
 
     @Test
-    public void testSettersAndGetters() {
+    void testSettersAndGetters() {
         HikeRoute route = new HikeRoute();
 
         route.setId(1);
@@ -36,7 +36,7 @@ public class HikeRouteTest {
     }
 
     @Test
-    public void testDifficultyValues() {
+    void testDifficultyValues() {
         HikeRoute route = new HikeRoute();
 
         route.setDifficulty("EASY");
@@ -50,14 +50,14 @@ public class HikeRouteTest {
     }
 
     @Test
-    public void testDistancePrecision() {
+    void testDistancePrecision() {
         HikeRoute route = new HikeRoute();
         route.setDistance(5.75);
         assertEquals(5.75, route.getDistance(), 0.001);
     }
 
     @Test
-    public void testDescriptionCanBeNull() {
+    void testDescriptionCanBeNull() {
         HikeRoute route = new HikeRoute();
         route.setDescription(null);
         assertNull(route.getDescription());

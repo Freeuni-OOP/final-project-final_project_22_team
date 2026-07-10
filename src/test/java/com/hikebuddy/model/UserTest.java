@@ -1,16 +1,13 @@
 package com.hikebuddy.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import java.sql.Timestamp;
-import static org.junit.Assert.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.testng.AssertJUnit.assertNull;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class UserTest {
 
     @Test
-    public void testEmptyConstructor() {
+    void testEmptyConstructor() {
         User user = new User();
         assertEquals(0, user.getId());
         assertNull(user.getUsername());
@@ -22,7 +19,7 @@ public class UserTest {
     }
 
     @Test
-    public void testConvenienceConstructor() {
+    void testConvenienceConstructor() {
         User user = new User("tornike", "hashedpw", "randomsalt");
         assertEquals("tornike", user.getUsername());
         assertEquals("hashedpw", user.getPasswordHash());
@@ -31,7 +28,7 @@ public class UserTest {
     }
 
     @Test
-    public void testSettersAndGetters() {
+    void testSettersAndGetters() {
         User user = new User();
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
@@ -53,7 +50,7 @@ public class UserTest {
     }
 
     @Test
-    public void testHikingLevelValues() {
+    void testHikingLevelValues() {
         User user = new User();
 
         user.setHikingLevel("BEGINNER");
@@ -67,14 +64,14 @@ public class UserTest {
     }
 
     @Test
-    public void testBioCanBeNull() {
+    void testBioCanBeNull() {
         User user = new User();
         user.setBio(null);
         assertNull(user.getBio());
     }
 
     @Test
-    public void testToString() {
+    void testToString() {
         User user = new User();
         user.setId(1);
         user.setUsername("tornike");

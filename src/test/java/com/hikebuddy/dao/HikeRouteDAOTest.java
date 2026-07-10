@@ -3,9 +3,9 @@ package com.hikebuddy.dao;
 import com.hikebuddy.model.HikeRoute;
 import com.hikebuddy.model.User;
 import com.hikebuddy.util.DBHelper;
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -13,7 +13,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.List;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class HikeRouteDAOTest {
 
@@ -22,12 +22,11 @@ public class HikeRouteDAOTest {
     private int testRouteId = -1;
     private int testUserId = -1;
 
-    @Before
-    public void setUp() throws SQLException {
+    @BeforeEach
+    void setUp() throws SQLException {
         hikeRouteDAO = new HikeRouteDAO();
         userDAO = new UserDAO();
 
-        // Insert a test route directly via SQL
         String sql = "INSERT INTO HikeRoute (name, region, difficulty, distance, description) " +
                 "VALUES (?, ?, ?, ?, ?)";
         try (Connection conn = DBHelper.getConnection();
@@ -44,16 +43,14 @@ public class HikeRouteDAOTest {
             }
         }
 
-        // Insert a test user for getSuggested
-        User user = new User("testuser_hikeroute", "hash", "salt");
+        User user = new User("testuser_hikeroute_dao", "hash", "salt");
         user.setHikingLevel("BEGINNER");
         userDAO.insert(user);
         testUserId = user.getId();
     }
 
-    @After
-    public void tearDown() throws SQLException {
-        // Delete test route
+    @AfterEach
+    void tearDown() throws SQLException {
         if (testRouteId > 0) {
             try (Connection conn = DBHelper.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(
@@ -62,7 +59,6 @@ public class HikeRouteDAOTest {
                 stmt.executeUpdate();
             }
         }
-        // Delete test user
         if (testUserId > 0) {
             try (Connection conn = DBHelper.getConnection();
                  PreparedStatement stmt = conn.prepareStatement(
@@ -73,25 +69,23 @@ public class HikeRouteDAOTest {
         }
     }
 
-    // --- getAll() ---
-
     @Test
-    public void testGetAllReturnsNonEmptyList() throws SQLException {
+    void testGetAllReturnsNonEmptyList() throws SQLException {
         List<HikeRoute> routes = hikeRouteDAO.getAll();
         assertNotNull(routes);
-        assertFalse("getAll should return at least the test route", routes.isEmpty());
+        assertFalse(routes.isEmpty());
     }
 
     @Test
-    public void testGetAllReturnsCorrectFields() throws SQLException {
+    void testGetAllContainsTestRoute() throws SQLException {
         List<HikeRoute> routes = hikeRouteDAO.getAll();
         boolean found = routes.stream()
                 .anyMatch(r -> r.getName().equals("Test Trail Unit"));
-        assertTrue("Test route should appear in getAll", found);
+        assertTrue(found);
     }
 
     @Test
-    public void testGetAllOrderedByName() throws SQLException {
+    void testGetAllOrderedByName() throws SQLException {
         List<HikeRoute> routes = hikeRouteDAO.getAll();
         for (int i = 0; i < routes.size() - 1; i++) {
             assertTrue(
@@ -101,10 +95,8 @@ public class HikeRouteDAOTest {
         }
     }
 
-    // --- getById() ---
-
     @Test
-    public void testGetByIdReturnsCorrectRoute() throws SQLException {
+    void testGetByIdReturnsCorrectRoute() throws SQLException {
         HikeRoute route = hikeRouteDAO.getById(testRouteId);
         assertNotNull(route);
         assertEquals("Test Trail Unit", route.getName());
@@ -114,15 +106,13 @@ public class HikeRouteDAOTest {
     }
 
     @Test
-    public void testGetByIdReturnsNullForMissingId() throws SQLException {
+    void testGetByIdReturnsNullForMissingId() throws SQLException {
         HikeRoute route = hikeRouteDAO.getById(-9999);
         assertNull(route);
     }
 
-    // --- getByDifficulty() ---
-
     @Test
-    public void testGetByDifficultyReturnsOnlyMatchingRoutes() throws SQLException {
+    void testGetByDifficultyReturnsOnlyMatchingRoutes() throws SQLException {
         List<HikeRoute> routes = hikeRouteDAO.getByDifficulty("EASY");
         assertNotNull(routes);
         for (HikeRoute route : routes) {
@@ -131,28 +121,24 @@ public class HikeRouteDAOTest {
     }
 
     @Test
-    public void testGetByDifficultyIncludesTestRoute() throws SQLException {
+    void testGetByDifficultyIncludesTestRoute() throws SQLException {
         List<HikeRoute> routes = hikeRouteDAO.getByDifficulty("EASY");
         boolean found = routes.stream()
                 .anyMatch(r -> r.getId() == testRouteId);
-        assertTrue("Test EASY route should appear in getByDifficulty", found);
+        assertTrue(found);
     }
 
     @Test
-    public void testGetByDifficultyReturnsEmptyForNoMatch() throws SQLException {
-        // Insert a HARD-only route — if seed data has no HARD, this catches that
+    void testGetByDifficultyHardRoutesAreAllHard() throws SQLException {
         List<HikeRoute> routes = hikeRouteDAO.getByDifficulty("HARD");
         assertNotNull(routes);
-        // Every result must be HARD
         for (HikeRoute r : routes) {
             assertEquals("HARD", r.getDifficulty());
         }
     }
 
-    // --- searchByNameOrRegion() ---
-
     @Test
-    public void testSearchByNameFindsTestRoute() throws SQLException {
+    void testSearchByNameFindsTestRoute() throws SQLException {
         List<HikeRoute> results = hikeRouteDAO.searchByNameOrRegion("Test Trail Unit");
         assertFalse(results.isEmpty());
         boolean found = results.stream()
@@ -161,7 +147,7 @@ public class HikeRouteDAOTest {
     }
 
     @Test
-    public void testSearchByRegionFindsTestRoute() throws SQLException {
+    void testSearchByRegionFindsTestRoute() throws SQLException {
         List<HikeRoute> results = hikeRouteDAO.searchByNameOrRegion("Test Region");
         assertFalse(results.isEmpty());
         boolean found = results.stream()
@@ -170,64 +156,56 @@ public class HikeRouteDAOTest {
     }
 
     @Test
-    public void testSearchByPartialNameFindsRoute() throws SQLException {
+    void testSearchByPartialNameFindsRoute() throws SQLException {
         List<HikeRoute> results = hikeRouteDAO.searchByNameOrRegion("Test Trail");
         assertFalse(results.isEmpty());
     }
 
     @Test
-    public void testSearchReturnsEmptyForNoMatch() throws SQLException {
+    void testSearchReturnsEmptyForNoMatch() throws SQLException {
         List<HikeRoute> results = hikeRouteDAO.searchByNameOrRegion(
                 "xyznonexistentroute999");
         assertNotNull(results);
         assertTrue(results.isEmpty());
     }
 
-    // --- getSuggested() ---
-
     @Test
-    public void testGetSuggestedReturnsMaxSixRoutes() throws SQLException {
+    void testGetSuggestedReturnsMaxSixRoutes() throws SQLException {
         List<HikeRoute> suggested = hikeRouteDAO.getSuggested(testUserId, "BEGINNER");
         assertNotNull(suggested);
-        assertTrue("getSuggested should return at most 6 routes",
-                suggested.size() <= 6);
+        assertTrue(suggested.size() <= 6);
     }
 
     @Test
-    public void testGetSuggestedReturnsEasyForBeginner() throws SQLException {
+    void testGetSuggestedReturnsEasyForBeginner() throws SQLException {
         List<HikeRoute> suggested = hikeRouteDAO.getSuggested(testUserId, "BEGINNER");
         for (HikeRoute route : suggested) {
-            assertEquals("BEGINNER users should get EASY routes",
-                    "EASY", route.getDifficulty());
+            assertEquals("EASY", route.getDifficulty());
         }
     }
 
     @Test
-    public void testGetSuggestedReturnsMediumForIntermediate() throws SQLException {
+    void testGetSuggestedReturnsMediumForIntermediate() throws SQLException {
         List<HikeRoute> suggested = hikeRouteDAO.getSuggested(testUserId, "INTERMEDIATE");
         for (HikeRoute route : suggested) {
-            assertEquals("INTERMEDIATE users should get MEDIUM routes",
-                    "MEDIUM", route.getDifficulty());
+            assertEquals("MEDIUM", route.getDifficulty());
         }
     }
 
     @Test
-    public void testGetSuggestedReturnsHardForAdvanced() throws SQLException {
+    void testGetSuggestedReturnsHardForAdvanced() throws SQLException {
         List<HikeRoute> suggested = hikeRouteDAO.getSuggested(testUserId, "ADVANCED");
         for (HikeRoute route : suggested) {
-            assertEquals("ADVANCED users should get HARD routes",
-                    "HARD", route.getDifficulty());
+            assertEquals("HARD", route.getDifficulty());
         }
     }
 
     @Test
-    public void testGetSuggestedReturnsListForUnknownLevel() throws SQLException {
-        // Unknown level should default to EASY
+    void testGetSuggestedUnknownLevelDefaultsToEasy() throws SQLException {
         List<HikeRoute> suggested = hikeRouteDAO.getSuggested(testUserId, "UNKNOWN");
         assertNotNull(suggested);
         for (HikeRoute route : suggested) {
-            assertEquals("Unknown level should default to EASY routes",
-                    "EASY", route.getDifficulty());
+            assertEquals("EASY", route.getDifficulty());
         }
     }
 }

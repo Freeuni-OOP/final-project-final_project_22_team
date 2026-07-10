@@ -1,13 +1,13 @@
 package com.hikebuddy.model;
 
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import java.sql.Timestamp;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.*;
 
 public class PhotoTest {
 
     @Test
-    public void testEmptyConstructor() {
+    void testEmptyConstructor() {
         Photo photo = new Photo();
         assertEquals(0, photo.getId());
         assertEquals(0, photo.getFolderId());
@@ -16,7 +16,7 @@ public class PhotoTest {
     }
 
     @Test
-    public void testSettersAndGetters() {
+    void testSettersAndGetters() {
         Photo photo = new Photo();
         Timestamp now = new Timestamp(System.currentTimeMillis());
 
@@ -32,14 +32,14 @@ public class PhotoTest {
     }
 
     @Test
-    public void testFilePathCanBeNull() {
+    void testFilePathCanBeNull() {
         Photo photo = new Photo();
         photo.setFilePath(null);
         assertNull(photo.getFilePath());
     }
 
     @Test
-    public void testFilePathValues() {
+    void testFilePathValues() {
         Photo photo = new Photo();
 
         photo.setFilePath("/uploads/abc123.jpg");
@@ -50,7 +50,7 @@ public class PhotoTest {
     }
 
     @Test
-    public void testFolderIdAssignment() {
+    void testFolderIdAssignment() {
         Photo photo = new Photo();
         photo.setFolderId(42);
         assertEquals(42, photo.getFolderId());
