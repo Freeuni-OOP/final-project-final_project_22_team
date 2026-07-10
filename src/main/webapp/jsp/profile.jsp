@@ -210,21 +210,24 @@
 <div class="section-card">
     <h2>Badges</h2>
     <%
-        java.util.List<com.hikebuddy.model.Badge> badges =
-                (java.util.List<com.hikebuddy.model.Badge>) request.getAttribute("badges");
-        if (badges != null && !badges.isEmpty()) {
-            for (com.hikebuddy.model.Badge badge : badges) {
+        java.util.Set<String> earnedBadgeTypes =
+                (java.util.Set<String>) request.getAttribute("earnedBadgeTypes");
+        if (earnedBadgeTypes == null) earnedBadgeTypes = new java.util.HashSet<>();
+
+        for (String badgeType : com.hikebuddy.model.Badge.ALL_TYPES) {
+            boolean earned = earnedBadgeTypes.contains(badgeType);
     %>
-    <div style="display:inline-block; background:#ecfdf5; border:1px solid #a7f3d0;
-                border-radius:8px; padding:10px 16px; margin:6px; font-weight:500;
-                color:#065f46;">
-        <%= badge.getDisplayName() %>
+    <div style="display:inline-block; border-radius:8px; padding:10px 16px; margin:6px; font-weight:500;
+                <%= earned
+                        ? "background:#ecfdf5; border:1px solid #a7f3d0; color:#065f46;"
+                        : "background:var(--color-bg); border:1px solid var(--color-border); color:var(--color-text-muted); opacity:0.75;" %>">
+        <div><%= com.hikebuddy.model.Badge.displayNameFor(badgeType) %></div>
+        <% if (!earned) { %>
+        <div style="font-size:12px; font-weight:normal; margin-top:2px;">
+            <%= com.hikebuddy.model.Badge.requirementFor(badgeType) %>
+        </div>
+        <% } %>
     </div>
-    <%
-        }
-    } else {
-    %>
-    <p style="color:#aaa;">Complete hikes and missions to earn badges!</p>
     <%
         }
     %>

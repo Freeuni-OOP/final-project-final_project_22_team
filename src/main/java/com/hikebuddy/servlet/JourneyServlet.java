@@ -1,8 +1,10 @@
 package com.hikebuddy.servlet;
 
+import com.hikebuddy.dao.BadgeDAO;
 import com.hikebuddy.dao.HikeRouteDAO;
 import com.hikebuddy.dao.JourneyDAO;
 import com.hikebuddy.dao.StoryFolderDAO;
+import com.hikebuddy.model.Badge;
 import com.hikebuddy.model.HikeRoute;
 import com.hikebuddy.model.JourneyEntry;
 import com.hikebuddy.model.User;
@@ -25,6 +27,7 @@ public class JourneyServlet extends HttpServlet {
     private final JourneyDAO journeyDAO = new JourneyDAO();
     private final HikeRouteDAO hikeRouteDAO = new HikeRouteDAO();
     private final StoryFolderDAO storyFolderDAO = new StoryFolderDAO();
+    private final BadgeDAO badgeDAO = new BadgeDAO();
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -104,6 +107,16 @@ public class JourneyServlet extends HttpServlet {
                 }
 
                 journeyDAO.updateStatus(entryId, newStatus, user.getId());
+
+                if ("COMPLETED".equals(newStatus)) {
+                    int completedCount = journeyDAO.getCountByUser(user.getId());
+                    if (completedCount >= 1) {
+                        badgeDAO.awardIfNotExists(user.getId(), Badge.FIRST_HIKE);
+                    }
+                    if (completedCount >= 10) {
+                        badgeDAO.awardIfNotExists(user.getId(), Badge.TEN_HIKES);
+                    }
+                }
             } else if ("delete".equals(action)) {
                 int entryId = Integer.parseInt(request.getParameter("entryId"));
                 journeyDAO.deleteEntry(entryId, user.getId());

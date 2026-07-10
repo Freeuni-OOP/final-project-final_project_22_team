@@ -1,8 +1,10 @@
 package com.hikebuddy.servlet;
 
+import com.hikebuddy.dao.BadgeDAO;
 import com.hikebuddy.dao.FriendDAO;
 import com.hikebuddy.dao.NotificationDAO;
 import com.hikebuddy.dao.UserDAO;
+import com.hikebuddy.model.Badge;
 import com.hikebuddy.model.FriendRequest;
 import com.hikebuddy.model.User;
 
@@ -22,6 +24,7 @@ public class FriendsServlet extends HttpServlet {
     private final FriendDAO friendDAO = new FriendDAO();
     private final UserDAO userDAO = new UserDAO();
     private final NotificationDAO notificationDAO = new NotificationDAO();
+    private final BadgeDAO badgeDAO = new BadgeDAO();
 
 
     @Override
@@ -101,6 +104,14 @@ public class FriendsServlet extends HttpServlet {
                     } catch (SQLException e) {
                         // notification failure must NOT break the accept action
                         e.printStackTrace();
+                    }
+
+                    // Both sides just gained a friend — check each for the First Friend badge
+                    if (friendDAO.getFriendCount(userId) >= 1) {
+                        badgeDAO.awardIfNotExists(userId, Badge.FIRST_FRIEND);
+                    }
+                    if (friendDAO.getFriendCount(senderId) >= 1) {
+                        badgeDAO.awardIfNotExists(senderId, Badge.FIRST_FRIEND);
                     }
 
                     break;

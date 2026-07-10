@@ -1,6 +1,8 @@
 package com.hikebuddy.servlet;
 
+import com.hikebuddy.dao.BadgeDAO;
 import com.hikebuddy.dao.GearDAO;
+import com.hikebuddy.model.Badge;
 import com.hikebuddy.model.User;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -16,6 +18,9 @@ import java.sql.SQLException;
 public class GearServlet extends HttpServlet {
 
     private final GearDAO gearDAO = new GearDAO();
+    private final BadgeDAO badgeDAO = new BadgeDAO();
+
+    private static final int GEAR_COLLECTOR_THRESHOLD = 5;
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
@@ -36,6 +41,10 @@ public class GearServlet extends HttpServlet {
                     return;
                 }
                 gearDAO.addGear(userId, name.trim());
+
+                if (gearDAO.getByUser(userId).size() >= GEAR_COLLECTOR_THRESHOLD) {
+                    badgeDAO.awardIfNotExists(userId, Badge.GEAR_COLLECTOR);
+                }
 
             } else if ("toggle".equals(action)) {
                 // Read gear id and current state
