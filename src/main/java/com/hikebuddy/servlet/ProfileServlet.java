@@ -20,6 +20,8 @@ import java.util.Set;
 import com.hikebuddy.dao.BadgeDAO;
 import com.hikebuddy.model.Badge;
 
+import com.hikebuddy.dao.JourneyDAO;
+
 import java.io.IOException;
 import java.sql.SQLException;
 
@@ -48,6 +50,11 @@ public class ProfileServlet extends HttpServlet {
             GearDAO gearDAO = new GearDAO();
             List<Gear> gearList = gearDAO.getByUser(user.getId());
             request.setAttribute("gearList", gearList);
+
+            // Load count of completed hikes
+            JourneyDAO journeyDAO = new JourneyDAO();
+            int hikeCount = journeyDAO.getCountByUser(user.getId());
+            request.setAttribute("hikeCount", hikeCount);
 
             // Load available days for current month
             CalendarDAO calendarDAO = new CalendarDAO();
