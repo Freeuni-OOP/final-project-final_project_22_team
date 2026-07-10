@@ -67,6 +67,12 @@ public class ProfileServlet extends HttpServlet {
             List<Badge> badges = badgeDAO.getByUser(user.getId());
             request.setAttribute("badges", badges);
 
+            Set<String> earnedBadgeTypes = new java.util.HashSet<>();
+            for (Badge b : badges) {
+                earnedBadgeTypes.add(b.getBadgeType());
+            }
+            request.setAttribute("earnedBadgeTypes", earnedBadgeTypes);
+
             // Load friend count and friends preview
             com.hikebuddy.dao.FriendDAO friendDAO = new com.hikebuddy.dao.FriendDAO();
             try {

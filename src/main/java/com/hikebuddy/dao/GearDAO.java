@@ -37,6 +37,21 @@ public class GearDAO {
     }
 
     /**
+     * Returns the number of gear items a user has, without fetching the rows.
+     */
+    public int getCountByUser(int userId) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM Gear WHERE user_id = ?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    /**
      * Adds a new unchecked gear item for a user.
      */
     public void addGear(int userId, String name) throws SQLException {
