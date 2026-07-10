@@ -1,6 +1,25 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ include file="header.jsp" %>
 
+<%!
+    private String escapeHtml(String s) {
+        if (s == null) return "";
+        return s.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&#39;");
+    }
+%>
+
+<div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+    <h1 style="margin:0;">Explore</h1>
+    <a href="${pageContext.request.contextPath}/profile" class="btn-green"
+       style="text-decoration:none; display:inline-block; padding:8px 16px;">
+        View Profile
+    </a>
+</div>
+
 <%-- Section 1: Search and Filter --%>
 <div class="section-card">
     <h2>Search Hikes</h2>
@@ -230,6 +249,50 @@
     <%      }
     }
     %>
+</div>
+
+<%-- Section 5: Your Storyboard --%>
+<div class="section-card">
+    <h2>Your Storyboard</h2>
+    <%
+        java.util.List<com.hikebuddy.model.StoryFolder> recentFolders =
+                (java.util.List<com.hikebuddy.model.StoryFolder>) request.getAttribute("recentFolders");
+        if (recentFolders == null || recentFolders.isEmpty()) {
+    %>
+    <p style="color:#aaa;">No folders yet.</p>
+    <%  } else { %>
+    <div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(160px,1fr)); gap:16px;">
+        <%
+            for (com.hikebuddy.model.StoryFolder folder : recentFolders) {
+        %>
+        <a href="${pageContext.request.contextPath}/folder?folderId=<%= folder.getId() %>"
+           style="text-decoration:none; color:inherit; border:1px solid #dce8dc;
+                  border-radius:8px; overflow:hidden; background:white;">
+            <%
+                if (folder.getThumbnailPath() != null) {
+            %>
+            <img src="<%= folder.getThumbnailPath() %>" alt="<%= escapeHtml(folder.getName()) %>"
+                 style="width:100%; height:100px; object-fit:cover; display:block;">
+            <%
+                } else {
+            %>
+            <div style="width:100%; height:100px; background:#f0f0f0; display:flex;
+                        align-items:center; justify-content:center; color:#aaa; font-size:12px;">
+                No photo
+            </div>
+            <%
+                }
+            %>
+            <p style="padding:8px; margin:0; font-size:13px; color:#2b2b2b;">
+                <%= escapeHtml(folder.getName()) %>
+            </p>
+        </a>
+        <%  } %>
+    </div>
+    <%  } %>
+    <a href="${pageContext.request.contextPath}/storyboard" style="color:#2d6a4f; display:inline-block; margin-top:12px;">
+        View all folders
+    </a>
 </div>
 
 <%@ include file="footer.jsp" %>

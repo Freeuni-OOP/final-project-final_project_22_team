@@ -3,10 +3,10 @@ package com.hikebuddy.servlet;
 import com.hikebuddy.dao.FriendDAO;
 import com.hikebuddy.dao.HikeRouteDAO;
 import com.hikebuddy.dao.JourneyDAO;
-import com.hikebuddy.dao.NotificationDAO;
 import com.hikebuddy.dao.StoryFolderDAO;
 import com.hikebuddy.model.HikeRoute;
 import com.hikebuddy.model.JourneyEntry;
+import com.hikebuddy.model.StoryFolder;
 import com.hikebuddy.model.User;
 
 import jakarta.servlet.ServletException;
@@ -28,7 +28,6 @@ public class ExploreServlet extends HttpServlet {
     private final HikeRouteDAO hikeRouteDAO = new HikeRouteDAO();
     private final JourneyDAO journeyDAO = new JourneyDAO();
     private final FriendDAO friendDAO = new FriendDAO();
-    private final NotificationDAO notificationDAO = new NotificationDAO();
     private final StoryFolderDAO storyFolderDAO = new StoryFolderDAO();
 
     @Override
@@ -97,12 +96,13 @@ public class ExploreServlet extends HttpServlet {
             request.setAttribute("friendHikes", new ArrayList<>());
         }
 
-        // Unread notification count for nav badge
+        // Recent storyboard folders
         try {
-            int unreadCount = notificationDAO.getUnreadCount(userId);
-            request.setAttribute("unreadCount", unreadCount);
+            List<StoryFolder> allFolders = storyFolderDAO.getFoldersByUser(userId);
+            List<StoryFolder> recentFolders = allFolders.size() > 2 ? allFolders.subList(0, 2) : allFolders;
+            request.setAttribute("recentFolders", recentFolders);
         } catch (SQLException e) {
-            request.setAttribute("unreadCount", 0);
+            request.setAttribute("recentFolders", new ArrayList<>());
         }
 
         request.getRequestDispatcher("/jsp/explore.jsp").forward(request, response);

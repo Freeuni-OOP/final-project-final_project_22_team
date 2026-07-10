@@ -39,12 +39,12 @@ public class NotificationsServlet extends HttpServlet {
             e.printStackTrace();
         }
 
-        // Redirect back to referring page or home if no referrer
+        // Redirect back to referring page or explore if no referrer
         String referer = request.getHeader("Referer");
         if (referer != null && !referer.isEmpty()) {
             response.sendRedirect(referer);
         } else {
-            response.sendRedirect(request.getContextPath() + "/home");
+            response.sendRedirect(request.getContextPath() + "/explore");
         }
     }
 }

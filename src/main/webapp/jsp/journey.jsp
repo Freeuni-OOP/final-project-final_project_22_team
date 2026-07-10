@@ -63,12 +63,12 @@
 
         <div class="form-group">
             <label>Status</label>
-            <div style="display:flex; gap:20px; margin-top:6px;">
-                <label style="font-weight:normal; display:flex; align-items:center; gap:6px;">
-                    <input type="radio" name="status" value="PENDING" checked> Planned
+            <div style="display:flex; margin-top:6px;">
+                <label style="font-weight:normal; display:flex; align-items:center; margin-right:20px;">
+                    <input type="radio" name="status" value="PENDING" checked style="width:auto; margin-right:6px;"> Planned
                 </label>
-                <label style="font-weight:normal; display:flex; align-items:center; gap:6px;">
-                    <input type="radio" name="status" value="WISHLIST"> Wishlist
+                <label style="font-weight:normal; display:flex; align-items:center;">
+                    <input type="radio" name="status" value="WISHLIST" style="width:auto; margin-right:6px;"> Wishlist
                 </label>
             </div>
         </div>

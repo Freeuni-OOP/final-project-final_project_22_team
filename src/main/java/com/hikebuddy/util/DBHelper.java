@@ -28,8 +28,16 @@ public class DBHelper {
             USER = props.getProperty("db.user");
             PASSWORD = props.getProperty("db.password");
 
+            // Tomcat's JreMemoryLeakPreventionListener triggers DriverManager's
+            // one-time driver auto-discovery before any webapp is deployed, so the
+            // ServiceLoader-based registration in WEB-INF/lib never runs. Load the
+            // driver explicitly so it self-registers via its own static initializer.
+            Class.forName("com.mysql.cj.jdbc.Driver");
+
         } catch (IOException e) {
             throw new RuntimeException("Failed to load db.properties", e);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException("MySQL JDBC driver not found on classpath", e);
         }
     }
 

@@ -43,14 +43,6 @@ public class StoryboardServlet extends HttpServlet {
             request.setAttribute("folders", new java.util.ArrayList<>());
         }
 
-        // Notification count for nav badge (task 8.6)
-        try {
-            int unreadCount = new com.hikebuddy.dao.NotificationDAO().getUnreadCount(user.getId());
-            request.setAttribute("unreadCount", unreadCount);
-        } catch (SQLException e) {
-            request.setAttribute("unreadCount", 0);
-        }
-
         request.getRequestDispatcher("/jsp/storyboard.jsp").forward(request, response);
     }
 
