@@ -9,6 +9,9 @@
     String progressWidth = "33%";
     if ("INTERMEDIATE".equals(hikingLevel)) progressWidth = "66%";
     else if ("ADVANCED".equals(hikingLevel)) progressWidth = "100%";
+
+    java.util.List<com.hikebuddy.model.Gear> gearList =
+            (java.util.List<com.hikebuddy.model.Gear>) request.getAttribute("gearList");
 %>
 
 <div class="profile-header">
@@ -24,11 +27,11 @@
 <%-- Stats row --%>
 <div class="stats-row">
     <div class="stat-card">
-        <div class="stat-number">0</div>
+        <div class="stat-number">${hikeCount}</div>
         <div class="stat-label">Hikes</div>
     </div>
     <div class="stat-card">
-        <div class="stat-number">0</div>
+        <div class="stat-number"><%= gearList != null ? gearList.size() : 0 %></div>
         <div class="stat-label">Gear items</div>
     </div>
     <div class="stat-card">
@@ -89,8 +92,6 @@
     <% } %>
 
     <%
-        java.util.List<com.hikebuddy.model.Gear> gearList =
-                (java.util.List<com.hikebuddy.model.Gear>) request.getAttribute("gearList");
         if (gearList != null && !gearList.isEmpty()) {
             for (com.hikebuddy.model.Gear gear : gearList) {
     %>
