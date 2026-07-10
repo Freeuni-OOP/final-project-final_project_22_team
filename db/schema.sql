@@ -7,7 +7,8 @@ CREATE TABLE User (
                       salt VARCHAR(100) NOT NULL,
                       hiking_level ENUM('BEGINNER', 'INTERMEDIATE', 'ADVANCED') DEFAULT 'BEGINNER',
                       bio TEXT,
-                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                      last_seen_requests_at TIMESTAMP NULL DEFAULT NULL
 );
 
 CREATE TABLE HikeRoute (
@@ -57,6 +58,7 @@ CREATE TABLE FriendRequest (
                                receiver_id INT NOT NULL,
                                status ENUM('PENDING', 'ACCEPTED', 'DECLINED') DEFAULT 'PENDING',
                                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                               accepted_at TIMESTAMP NULL DEFAULT NULL,
                                FOREIGN KEY (sender_id) REFERENCES User(id),
                                FOREIGN KEY (receiver_id) REFERENCES User(id),
                                UNIQUE KEY unique_request (sender_id, receiver_id)

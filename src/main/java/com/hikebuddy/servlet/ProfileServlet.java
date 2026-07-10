@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import com.hikebuddy.util.FriendRequestBadgeHelper;
 
 import com.hikebuddy.dao.GearDAO;
 import com.hikebuddy.model.Gear;
@@ -45,6 +46,7 @@ public class ProfileServlet extends HttpServlet {
 
             // 3. Set user as request attribute for the JSP
             request.setAttribute("user", user);
+            FriendRequestBadgeHelper.loadUnseenCount(request, user.getId());
 
             // Load gear list
             GearDAO gearDAO = new GearDAO();

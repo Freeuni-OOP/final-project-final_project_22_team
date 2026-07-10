@@ -7,6 +7,7 @@ import com.hikebuddy.dao.UserDAO;
 import com.hikebuddy.model.Badge;
 import com.hikebuddy.model.FriendRequest;
 import com.hikebuddy.model.User;
+import com.hikebuddy.util.FriendRequestBadgeHelper;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -41,6 +42,15 @@ public class FriendsServlet extends HttpServlet {
 
             request.setAttribute("incomingRequests", incomingRequests);
             request.setAttribute("friends", friends);
+
+            // Load recently accepted requests (must happen BEFORE updateLastSeenRequests,
+            // otherwise nothing will show as "recent" anymore)
+            List<FriendRequest> recentlyAccepted = friendDAO.getRecentlyAcceptedBySender(userId);
+            request.setAttribute("recentlyAccepted", recentlyAccepted);
+
+            // Mark requests as seen now that the user is viewing the friends page
+            userDAO.updateLastSeenRequests(userId);
+            request.setAttribute("unseenFriendRequests", 0);
 
             // Only run search if action=search AND q param is present
             String action = request.getParameter("action");

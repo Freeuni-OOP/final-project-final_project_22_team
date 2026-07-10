@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import com.hikebuddy.util.FriendRequestBadgeHelper;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -39,6 +40,7 @@ public class JourneyServlet extends HttpServlet {
             return;
         }
         User user = (User) session.getAttribute("user");
+        FriendRequestBadgeHelper.loadUnseenCount(request, user.getId());
 
         List<JourneyEntry> plannedEntries;
         try {

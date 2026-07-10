@@ -6,6 +6,20 @@
 
 <h1>Friends</h1>
 
+<%
+    List<FriendRequest> recentlyAccepted = (List<FriendRequest>) request.getAttribute("recentlyAccepted");
+    if (recentlyAccepted != null && !recentlyAccepted.isEmpty()) {
+        for (FriendRequest r : recentlyAccepted) {
+%>
+<div style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; padding:12px 16px;
+            border-radius:6px; margin-bottom:12px;">
+    ✓ <%= r.getReceiverUsername() %> accepted your friend request!
+</div>
+<%
+        }
+    }
+%>
+
 <!-- SECTION 1: Search -->
 <section class="friends-section">
     <h2>Find Friends</h2>

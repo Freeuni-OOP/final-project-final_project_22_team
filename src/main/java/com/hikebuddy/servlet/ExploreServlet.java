@@ -8,6 +8,7 @@ import com.hikebuddy.model.HikeRoute;
 import com.hikebuddy.model.JourneyEntry;
 import com.hikebuddy.model.StoryFolder;
 import com.hikebuddy.model.User;
+import com.hikebuddy.util.FriendRequestBadgeHelper;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
@@ -42,6 +43,7 @@ public class ExploreServlet extends HttpServlet {
         User loggedInUser = (User) session.getAttribute("user");
         int userId = loggedInUser.getId();
         String hikingLevel = loggedInUser.getHikingLevel();
+        FriendRequestBadgeHelper.loadUnseenCount(request, userId);
 
         // Search and filter
         String query = request.getParameter("q");

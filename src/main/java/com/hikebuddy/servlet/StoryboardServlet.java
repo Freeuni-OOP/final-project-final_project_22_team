@@ -11,6 +11,7 @@ import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import com.hikebuddy.util.FriendRequestBadgeHelper;
 
 import java.io.File;
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class StoryboardServlet extends HttpServlet {
         }
 
         User user = (User) session.getAttribute("user");
+        FriendRequestBadgeHelper.loadUnseenCount(request, user.getId());
 
         try {
             List<StoryFolder> folders = storyFolderDAO.getFoldersByUser(user.getId());
