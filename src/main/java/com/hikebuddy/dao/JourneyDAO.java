@@ -146,6 +146,23 @@ public class JourneyDAO {
     }
 
     /**
+     * Returns the number of COMPLETED entries for a user at a specific
+     * difficulty (used to auto-promote hiking level).
+     */
+    public int getCompletedCountByDifficulty(int userId, String difficulty) throws SQLException {
+        String sql = "SELECT COUNT(*) FROM JourneyEntry WHERE user_id = ? AND status = 'COMPLETED' AND difficulty = ?";
+        try (Connection conn = DBHelper.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, userId);
+            stmt.setString(2, difficulty);
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) return rs.getInt(1);
+            }
+        }
+        return 0;
+    }
+
+    /**
      * Returns the last `limit` completed entries for a user, joined with
      * HikeRoute for routeName. Used by the Explore page (Epic 7/8).
      */

@@ -4,6 +4,7 @@ import com.hikebuddy.dao.BadgeDAO;
 import com.hikebuddy.dao.HikeRouteDAO;
 import com.hikebuddy.dao.JourneyDAO;
 import com.hikebuddy.dao.StoryFolderDAO;
+import com.hikebuddy.dao.UserDAO;
 import com.hikebuddy.model.Badge;
 import com.hikebuddy.model.HikeRoute;
 import com.hikebuddy.model.JourneyEntry;
@@ -29,6 +30,11 @@ public class JourneyServlet extends HttpServlet {
     private final HikeRouteDAO hikeRouteDAO = new HikeRouteDAO();
     private final StoryFolderDAO storyFolderDAO = new StoryFolderDAO();
     private final BadgeDAO badgeDAO = new BadgeDAO();
+    private final UserDAO userDAO = new UserDAO();
+
+    // Total completed hikes (any difficulty) required to auto-promote to the next level
+    private static final int HIKES_TO_INTERMEDIATE = 5;
+    private static final int HIKES_TO_ADVANCED = 10;
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
@@ -118,6 +124,7 @@ public class JourneyServlet extends HttpServlet {
                     if (completedCount >= 10) {
                         badgeDAO.awardIfNotExists(user.getId(), Badge.TEN_HIKES);
                     }
+                    checkForLevelUp(user, session, completedCount);
                 }
             } else if ("delete".equals(action)) {
                 int entryId = Integer.parseInt(request.getParameter("entryId"));
@@ -216,5 +223,29 @@ public class JourneyServlet extends HttpServlet {
             e.printStackTrace();
         }
         request.getRequestDispatcher("/jsp/journey.jsp").forward(request, response);
+    }
+
+    /**
+     * Auto-promotes the user's hiking level based on total completed hikes,
+     * regardless of difficulty: enough hikes moves a BEGINNER to
+     * INTERMEDIATE, more moves an INTERMEDIATE to ADVANCED. ADVANCED is the
+     * top level, nothing promotes past it. Never downgrades — this only
+     * ever moves a user up.
+     */
+    private void checkForLevelUp(User user, HttpSession session, int completedCount) throws SQLException {
+        String currentLevel = user.getHikingLevel();
+        String newLevel = null;
+
+        if ("BEGINNER".equals(currentLevel) && completedCount >= HIKES_TO_INTERMEDIATE) {
+            newLevel = "INTERMEDIATE";
+        } else if ("INTERMEDIATE".equals(currentLevel) && completedCount >= HIKES_TO_ADVANCED) {
+            newLevel = "ADVANCED";
+        }
+
+        if (newLevel != null) {
+            user.setHikingLevel(newLevel);
+            userDAO.updateProfile(user);
+            session.setAttribute("user", user);
+        }
     }
 }
