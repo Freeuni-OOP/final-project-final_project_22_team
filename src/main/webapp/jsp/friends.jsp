@@ -58,6 +58,7 @@
         <form method="post" action="${pageContext.request.contextPath}/friends" style="display:inline;">
             <input type="hidden" name="action" value="accept">
             <input type="hidden" name="requestId" value="<%= r.getId() %>">
+            <input type="hidden" name="senderId" value="<%= r.getSenderId() %>">
             <button type="submit">Accept</button>
         </form>
         <form method="post" action="${pageContext.request.contextPath}/friends" style="display:inline;">
@@ -76,7 +77,7 @@
 <section class="friends-section">
     <h2>My Friends</h2>
     <%
-        List<User> friends = (List<User>) request.getAttribute("friendsList");
+        List<User> friends = (List<User>) request.getAttribute("friends");
         if (friends == null || friends.isEmpty()) {
     %>
     <p>None yet.</p>
