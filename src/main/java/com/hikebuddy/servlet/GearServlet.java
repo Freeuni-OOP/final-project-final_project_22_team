@@ -42,7 +42,7 @@ public class GearServlet extends HttpServlet {
                 }
                 gearDAO.addGear(userId, name.trim());
 
-                if (gearDAO.getByUser(userId).size() >= GEAR_COLLECTOR_THRESHOLD) {
+                if (gearDAO.getCountByUser(userId) >= GEAR_COLLECTOR_THRESHOLD) {
                     badgeDAO.awardIfNotExists(userId, Badge.GEAR_COLLECTOR);
                 }
 
