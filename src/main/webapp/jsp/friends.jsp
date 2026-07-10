@@ -1,0 +1,116 @@
+<%@ page contentType="text/html;charset=UTF-8" pageEncoding="UTF-8" language="java" %>
+<%@ page import="java.util.List" %>
+<%@ page import="com.hikebuddy.model.User" %>
+<%@ page import="com.hikebuddy.model.FriendRequest" %>
+<%@ include file="header.jsp" %>
+
+<h1>Friends</h1>
+
+<%
+    List<FriendRequest> recentlyAccepted = (List<FriendRequest>) request.getAttribute("recentlyAccepted");
+    if (recentlyAccepted != null && !recentlyAccepted.isEmpty()) {
+        for (FriendRequest r : recentlyAccepted) {
+%>
+<div style="background:#ecfdf5; color:#065f46; border:1px solid #a7f3d0; padding:12px 16px;
+            border-radius:6px; margin-bottom:12px;">
+    ✓ <%= r.getReceiverUsername() %> accepted your friend request!
+</div>
+<%
+        }
+    }
+%>
+
+<!-- SECTION 1: Search -->
+<section class="friends-section">
+    <h2>Find Friends</h2>
+    <form method="get" action="${pageContext.request.contextPath}/friends">
+        <input type="hidden" name="action" value="search">
+        <input type="text" name="q" placeholder="Search by username" required
+               value="${param.q != null ? param.q : ''}">
+        <button type="submit" class="btn-green">Search</button>
+    </form>
+
+    <%
+        List<User> searchResults = (List<User>) request.getAttribute("searchResults");
+        if (searchResults != null) {
+            if (searchResults.isEmpty()) {
+    %>
+    <p>No users found.</p>
+    <%
+    } else {
+        for (User u : searchResults) {
+    %>
+    <div class="friend-row">
+        <span><%= u.getUsername() %></span>
+        <form method="post" action="${pageContext.request.contextPath}/friends" style="display:inline;">
+            <input type="hidden" name="action" value="send">
+            <input type="hidden" name="targetUserId" value="<%= u.getId() %>">
+            <button type="submit" class="btn-green">Send request</button>
+        </form>
+    </div>
+    <%
+                }
+            }
+        }
+    %>
+</section>
+
+<!-- SECTION 2: Incoming requests -->
+<section class="friends-section">
+    <h2>Incoming Requests</h2>
+    <%
+        List<FriendRequest> incoming = (List<FriendRequest>) request.getAttribute("incomingRequests");
+        if (incoming == null || incoming.isEmpty()) {
+    %>
+    <p>None yet.</p>
+    <%
+    } else {
+        for (FriendRequest r : incoming) {
+    %>
+    <div class="friend-row">
+        <span><%= r.getSenderUsername() %></span>
+        <form method="post" action="${pageContext.request.contextPath}/friends" style="display:inline;">
+            <input type="hidden" name="action" value="accept">
+            <input type="hidden" name="requestId" value="<%= r.getId() %>">
+            <input type="hidden" name="senderId" value="<%= r.getSenderId() %>">
+            <button type="submit" class="btn-green">Accept</button>
+        </form>
+        <form method="post" action="${pageContext.request.contextPath}/friends" style="display:inline;">
+            <input type="hidden" name="action" value="decline">
+            <input type="hidden" name="requestId" value="<%= r.getId() %>">
+            <button type="submit" class="btn-red">Decline</button>
+        </form>
+    </div>
+    <%
+            }
+        }
+    %>
+</section>
+
+<!-- SECTION 3: My friends -->
+<section class="friends-section">
+    <h2>My Friends</h2>
+    <%
+        List<User> friends = (List<User>) request.getAttribute("friends");
+        if (friends == null || friends.isEmpty()) {
+    %>
+    <p>None yet.</p>
+    <%
+    } else {
+        for (User f : friends) {
+    %>
+    <div class="friend-row">
+        <span><%= f.getUsername() %></span>
+        <form method="post" action="${pageContext.request.contextPath}/friends" style="display:inline;">
+            <input type="hidden" name="action" value="remove">
+            <input type="hidden" name="friendId" value="<%= f.getId() %>">
+            <button type="submit" class="btn-red">Remove</button>
+        </form>
+    </div>
+    <%
+            }
+        }
+    %>
+</section>
+
+<%@ include file="footer.jsp" %>

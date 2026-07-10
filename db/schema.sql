@@ -7,7 +7,8 @@ CREATE TABLE User (
                       salt VARCHAR(100) NOT NULL,
                       hiking_level ENUM('BEGINNER', 'INTERMEDIATE', 'ADVANCED') DEFAULT 'BEGINNER',
                       bio TEXT,
-                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                      last_seen_requests_at TIMESTAMP NULL DEFAULT NULL
 );
 
 CREATE TABLE HikeRoute (
@@ -49,4 +50,60 @@ CREATE TABLE Photo (
                        file_path VARCHAR(255) NOT NULL,
                        uploaded_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                        FOREIGN KEY (folder_id) REFERENCES StoryFolder(id)
+);
+
+CREATE TABLE FriendRequest (
+                               id INT AUTO_INCREMENT PRIMARY KEY,
+                               sender_id INT NOT NULL,
+                               receiver_id INT NOT NULL,
+                               status ENUM('PENDING', 'ACCEPTED', 'DECLINED') DEFAULT 'PENDING',
+                               created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                               accepted_at TIMESTAMP NULL DEFAULT NULL,
+                               FOREIGN KEY (sender_id) REFERENCES User(id),
+                               FOREIGN KEY (receiver_id) REFERENCES User(id),
+                               UNIQUE KEY unique_request (sender_id, receiver_id)
+);
+
+CREATE TABLE Friendship (
+                            id INT AUTO_INCREMENT PRIMARY KEY,
+                            user_id_1 INT NOT NULL,
+                            user_id_2 INT NOT NULL,
+                            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                            FOREIGN KEY (user_id_1) REFERENCES User(id),
+                            FOREIGN KEY (user_id_2) REFERENCES User(id),
+                            UNIQUE KEY unique_friendship (user_id_1, user_id_2)
+);
+
+CREATE TABLE Gear (
+                      id INT AUTO_INCREMENT PRIMARY KEY,
+                      user_id INT NOT NULL,
+                      name VARCHAR(100) NOT NULL,
+                      is_checked BOOLEAN DEFAULT FALSE,
+                      FOREIGN KEY (user_id) REFERENCES User(id)
+);
+
+CREATE TABLE AvailableDay (
+                              id INT AUTO_INCREMENT PRIMARY KEY,
+                              user_id INT NOT NULL,
+                              available_date DATE NOT NULL,
+                              FOREIGN KEY (user_id) REFERENCES User(id),
+                              UNIQUE KEY unique_user_date (user_id, available_date)
+);
+
+CREATE TABLE Badge (
+                       id INT AUTO_INCREMENT PRIMARY KEY,
+                       user_id INT NOT NULL,
+                       badge_type VARCHAR(50) NOT NULL,
+                       earned_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                       FOREIGN KEY (user_id) REFERENCES User(id)
+);
+
+CREATE TABLE Notification (
+                              id INT AUTO_INCREMENT PRIMARY KEY,
+                              user_id INT NOT NULL,
+                              type ENUM('FRIEND_REQUEST', 'FRIEND_ACCEPTED', 'HIKE_SUGGESTION') NOT NULL,
+                              message TEXT,
+                              is_read BOOLEAN DEFAULT FALSE,
+                              created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                              FOREIGN KEY (user_id) REFERENCES User(id)
 );

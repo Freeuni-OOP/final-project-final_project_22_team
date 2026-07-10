@@ -1,44 +1,97 @@
+:root {
+    --color-bg: #f1ece0;
+    --color-bg-line: #e2dac2;
+    --color-surface: #fffdf7;
+    --color-border: #e3dcc7;
+    --color-text: #2b2a20;
+    --color-text-muted: #6b6a58;
+    --color-forest: #1f3d2b;
+    --color-forest-dark: #14281b;
+    --color-sage: #7c8c5e;
+    --color-sage-bg: #e6e4cd;
+    --color-rust: #bc6c39;
+    --color-rust-dark: #99582d;
+
+    --font-sans: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    --font-serif: Georgia, "Times New Roman", serif;
+    --font-mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-family: var(--font-sans);
 }
 
 body {
-    background-color: #f4f6f4;
-    color: #2b2b2b;
+    background-color: var(--color-bg);
+    background-image:
+        repeating-linear-gradient(60deg, var(--color-bg-line) 0, var(--color-bg-line) 1px, transparent 1px, transparent 96px),
+        repeating-linear-gradient(-60deg, var(--color-bg-line) 0, var(--color-bg-line) 1px, transparent 1px, transparent 96px);
+    background-attachment: fixed;
+    color: var(--color-text);
     line-height: 1.5;
+}
+
+h1, h2, h3 {
+    font-family: var(--font-serif);
 }
 
 /* Navigation bar */
 nav {
-    background-color: #2d6a4f;
-    padding: 15px 30px;
+    background-color: var(--color-surface);
+    border-bottom: 1px solid var(--color-border);
+    padding: 16px 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
 }
 
 nav .logo {
-    color: white;
-    font-size: 1.3rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--color-text);
+    font-family: var(--font-serif);
+    font-size: 1.4rem;
     font-weight: bold;
+}
+
+nav .logo-icon {
+    width: 26px;
+    height: 26px;
+    flex-shrink: 0;
+    color: var(--color-rust-dark);
 }
 
 nav .nav-links {
     display: flex;
+    align-items: center;
     gap: 22px;
 }
 
 nav .nav-links a {
-    color: white;
+    color: var(--color-text);
     text-decoration: none;
     font-weight: 500;
+    padding-bottom: 4px;
+    border-bottom: 2px solid transparent;
 }
 
 nav .nav-links a:hover {
-    text-decoration: underline;
+    color: var(--color-rust-dark);
+}
+
+nav .logout-link {
+    display: flex;
+    align-items: center;
+    border-bottom: none;
+}
+
+nav .logout-link svg {
+    width: 20px;
+    height: 20px;
 }
 
 /* Main content area */
@@ -50,19 +103,541 @@ nav .nav-links a:hover {
 }
 
 .container h1 {
-    color: #1b4332;
+    color: var(--color-forest);
     margin-bottom: 10px;
 }
 
 .container p {
-    color: #444;
+    color: var(--color-text-muted);
 }
 
 /* Footer */
 footer {
-    background-color: #2d6a4f;
+    background-color: var(--color-forest);
     color: white;
     text-align: center;
     padding: 16px;
     margin-top: 40px;
+}
+/* Friends page */
+.friends-section {
+    background: var(--color-surface);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.friend-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.friend-row:last-child {
+    border-bottom: none;
+}
+
+.entry-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.entry-row:last-child {
+    border-bottom: none;
+}
+
+/* Profile page */
+.profile-header {
+    margin-bottom: 30px;
+}
+
+.profile-header h1 {
+    color: var(--color-forest);
+    margin-bottom: 4px;
+}
+
+.profile-header p {
+    color: var(--color-text-muted);
+    font-size: 15px;
+}
+
+.stats-row {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.stat-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 16px 24px;
+    min-width: 140px;
+    text-align: center;
+}
+
+.stat-card .stat-number {
+    font-size: 28px;
+    font-weight: bold;
+    color: var(--color-forest);
+}
+
+.stat-card .stat-label {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-top: 4px;
+}
+
+.level-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 16px 24px;
+    min-width: 200px;
+    text-align: center;
+}
+
+.level-card .stat-label {
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-bottom: 8px;
+}
+
+.level-card .stat-number {
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--color-forest);
+    margin-bottom: 8px;
+}
+
+.progress-bar-bg {
+    background: var(--color-border);
+    border-radius: 10px;
+    height: 8px;
+    width: 100%;
+}
+
+.progress-bar-fill {
+    background: var(--color-sage);
+    border-radius: 10px;
+    height: 8px;
+}
+
+.section-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.section-card h2 {
+    color: var(--color-forest);
+    margin-bottom: 16px;
+    font-size: 18px;
+}
+
+.bio-text {
+    color: var(--color-text-muted);
+    font-size: 15px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+.form-group {
+    margin-bottom: 16px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    margin-bottom: 6px;
+    color: var(--color-text);
+}
+
+.form-group input:not([type="radio"]):not([type="checkbox"]),
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    font-size: 15px;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 80px;
+}
+
+.btn-green {
+    background-color: var(--color-forest);
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 10px 24px;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.btn-green:hover {
+    background-color: var(--color-forest);
+}
+
+.btn-red {
+    background-color: #c0392b;
+    color: white;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 0.85em;
+}
+
+.btn-red:hover {
+    background-color: #922b21;
+}
+
+.success-msg {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border: 1px solid #a7f3d0;
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin-bottom: 16px;
+}
+
+.home-section {
+    background: var(--color-surface);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+.progress-bar {
+    background: var(--color-border);
+    border-radius: 4px;
+    height: 8px;
+    width: 100%;
+    margin: 10px 0;
+    overflow: hidden;
+}
+
+.progress-fill {
+    background: var(--color-sage);
+    height: 100%;
+}
+
+.hike-card {
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 10px;
+}
+
+.journey-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--color-border);
+}
+
+.folder-card {
+    display: inline-block;
+    width: 120px;
+    margin-right: 10px;
+    text-align: center;
+    text-decoration: none;
+    color: inherit;
+}
+
+.folder-card img {
+    width: 120px;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 6px;
+}
+
+.folder-placeholder {
+    width: 120px;
+    height: 120px;
+    background: var(--color-border);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--color-text-muted);
+}
+
+.nav-links a.active {
+    border-bottom: 2px solid var(--color-rust);
+    color: var(--color-rust-dark);
+    font-weight: bold;
+}
+
+/* My Journey page */
+.journey-tabs {
+    display: inline-flex;
+    background: var(--color-bg-line);
+    padding: 4px;
+    border-radius: 10px;
+    margin-bottom: 24px;
+    gap: 4px;
+}
+
+.journey-tab {
+    border: none;
+    background: transparent;
+    padding: 10px 18px;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 15px;
+    color: var(--color-text-muted);
+    cursor: pointer;
+}
+
+.journey-tab.active {
+    background: var(--color-surface);
+    color: var(--color-text);
+    box-shadow: 0 1px 2px rgba(0,0,0,0.08);
+}
+
+.journey-tab .tab-count {
+    font-weight: 400;
+    color: var(--color-text-muted);
+    font-size: 13px;
+    margin-left: 4px;
+}
+
+.journey-layout {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 24px;
+    align-items: start;
+}
+
+.journey-card {
+    background: var(--color-surface);
+    border: 1px solid var(--color-border);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 16px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.journey-card-thumb {
+    width: 96px;
+    height: 96px;
+    border-radius: 10px;
+    flex-shrink: 0;
+    background: linear-gradient(160deg, #c3cdb9 0%, #3a5240 60%, #1f3d2b 100%);
+}
+
+.journey-card:nth-of-type(2n) .journey-card-thumb {
+    background: linear-gradient(160deg, #cdd6c4 0%, #4c6350 60%, #24432f 100%);
+}
+
+.journey-card:nth-of-type(3n) .journey-card-thumb {
+    background: linear-gradient(160deg, #d8dfc9 0%, #56694a 60%, #2b4530 100%);
+}
+
+.journey-card-body {
+    flex: 1;
+    min-width: 0;
+}
+
+.journey-card-title-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.journey-card-title-row h3 {
+    font-family: var(--font-serif);
+    font-size: 19px;
+    color: var(--color-text);
+}
+
+.journey-status-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    white-space: nowrap;
+}
+
+.journey-status-badge.pending {
+    background: #f3e3cf;
+    color: var(--color-rust-dark);
+}
+
+.journey-status-badge.completed {
+    background: var(--color-sage-bg);
+    color: #4b5a37;
+}
+
+.journey-card-location {
+    color: var(--color-text-muted);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    margin-top: 4px;
+}
+
+.journey-card-stats {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--color-text-muted);
+    margin-top: 8px;
+    flex-wrap: wrap;
+}
+
+.journey-card-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.journey-card-remove {
+    background: none;
+    border: none;
+    font-size: 20px;
+    line-height: 1;
+    color: var(--color-text-muted);
+    cursor: pointer;
+    padding: 2px 6px;
+}
+
+.journey-card-remove:hover {
+    color: var(--color-rust-dark);
+}
+
+.journey-card-link-btn {
+    background: none;
+    border: none;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--color-forest);
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    white-space: nowrap;
+}
+
+.journey-form-col .form-group label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--color-text-muted);
+    font-weight: 600;
+}
+
+.journey-form-col .form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+/* ===================================
+   Responsive layout (mobile-friendly)
+   Breakpoint: 768px
+   =================================== */
+@media (max-width: 768px) {
+
+    /* Nav bar — stack vertically instead of horizontal row */
+    nav {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 14px;
+    }
+
+    nav .nav-links {
+        flex-direction: column;
+        gap: 10px;
+        width: 100%;
+    }
+
+    /* Profile stats — single column instead of side-by-side cards */
+    .stats-row {
+        flex-direction: column;
+    }
+
+    .stat-card,
+    .level-card {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* Rows that were side-by-side (name + buttons) — stack instead */
+    .friend-row,
+    .entry-row,
+    .journey-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+
+    /* Storyboard folder previews — full width instead of horizontal scroll */
+    .folder-card {
+        display: block;
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 12px;
+    }
+
+    /* My Journey — single column, thumbnail stacks above card content */
+    .journey-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .journey-card {
+        flex-direction: column;
+    }
+
+    .journey-card-thumb {
+        width: 100%;
+        height: 120px;
+    }
+
+    .journey-card-actions {
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .journey-form-col .form-row {
+        grid-template-columns: 1fr;
+    }
+
+    /* Tighter padding on small screens */
+    .container {
+        padding: 0 14px;
+    }
+
+    .section-card,
+    .home-section,
+    .friends-section {
+        padding: 16px;
+    }
 }
