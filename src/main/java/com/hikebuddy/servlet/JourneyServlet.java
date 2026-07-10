@@ -64,14 +64,6 @@ public class JourneyServlet extends HttpServlet {
         }
         request.setAttribute("hikeRoutes", hikeRoutes);
 
-        // Notification count for nav badge
-        try {
-            int unreadCount = new com.hikebuddy.dao.NotificationDAO().getUnreadCount(user.getId());
-            request.setAttribute("unreadCount", unreadCount);
-        } catch (SQLException e) {
-            request.setAttribute("unreadCount", 0);
-        }
-
         request.getRequestDispatcher("/jsp/journey.jsp").forward(request, response);
     }
 

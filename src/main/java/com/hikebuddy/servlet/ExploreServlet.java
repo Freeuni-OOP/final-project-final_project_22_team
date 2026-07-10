@@ -3,7 +3,6 @@ package com.hikebuddy.servlet;
 import com.hikebuddy.dao.FriendDAO;
 import com.hikebuddy.dao.HikeRouteDAO;
 import com.hikebuddy.dao.JourneyDAO;
-import com.hikebuddy.dao.NotificationDAO;
 import com.hikebuddy.dao.StoryFolderDAO;
 import com.hikebuddy.model.HikeRoute;
 import com.hikebuddy.model.JourneyEntry;
@@ -29,7 +28,6 @@ public class ExploreServlet extends HttpServlet {
     private final HikeRouteDAO hikeRouteDAO = new HikeRouteDAO();
     private final JourneyDAO journeyDAO = new JourneyDAO();
     private final FriendDAO friendDAO = new FriendDAO();
-    private final NotificationDAO notificationDAO = new NotificationDAO();
     private final StoryFolderDAO storyFolderDAO = new StoryFolderDAO();
 
     @Override
@@ -96,14 +94,6 @@ public class ExploreServlet extends HttpServlet {
             request.setAttribute("friendHikes", friendHikes);
         } catch (SQLException e) {
             request.setAttribute("friendHikes", new ArrayList<>());
-        }
-
-        // Unread notification count for nav badge
-        try {
-            int unreadCount = notificationDAO.getUnreadCount(userId);
-            request.setAttribute("unreadCount", unreadCount);
-        } catch (SQLException e) {
-            request.setAttribute("unreadCount", 0);
         }
 
         // Recent storyboard folders
